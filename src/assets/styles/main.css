@@ -1,0 +1,117 @@
+/***** GLOBAL VARIABLES *****/
+:root {
+    --default-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
+    --color-cape-cod: #3A3E3F;
+    --color-shark: #292C2E;
+    --color-nobel: #BCB7B7;
+    --color-thunderbird: #B91C1C;
+    --color-flamingo: #EF4444;
+    --bg-main: #F4F4F5;
+    --vertical-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    --horizontal-box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);
+    /** for modal buttons or modal corners **/
+    --primary-border-radius: 20px;
+    /** add task, tags, prj, input **/
+    --secondary-border-radius: 40px;
+    /** static dimensions **/
+    --ribbon-width: 30px;
+    --sidebar-width: 270px;
+    --header-height: 77px;
+    --footer-height: 35px;
+    --main-width: calc(100vw - calc(var(--sidebar-width) + var(--ribbon-width)));
+    --main-height: calc(100vh - calc(var(--header-height) + var(--footer-height)));
+}
+
+/***** BASE ELEMENTS *****/
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--default-font);
+    display: grid;
+    grid-template-areas: "ribbon sidebar header"
+        "ribbon sidebar main"
+        "ribbon sidebar footer";
+}
+
+/***** REUSABLE ELEMENTS *****/
+
+/***** LAYOUT ELEMENTS *****/
+body>*:not(.sidebar, .ribbon) {
+    width: var(--main-width);
+}
+.ribbon, .sidebar{
+    height: 100vh;
+}
+.ribbon {
+    width: var(--ribbon-width);
+    height: 100vh;
+    background-color: var(--color-cape-cod);
+    grid-area: ribbon;
+    z-index: 40;
+    box-shadow: var(--horizontal-box-shadow);
+    display: flex;
+}
+
+/*** SIDEBAR ***/
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: inherit;
+    border-left: 1px solid black;
+    grid-area: sidebar;
+    background-color: var(--color-cape-cod);
+    width: var(--sidebar-width);
+    z-index: 30;
+}
+
+.sidebar__ribbon {
+    width: 30px;
+}
+
+
+
+.logo {
+    width: 200px;
+    height: 84px;
+}
+
+/*** HEADER ***/
+.header {
+    height: var(--header-height);
+    background-color: var(--color-flamingo);
+    font-size: 52px;
+    grid-area: header;
+    z-index: 50;
+    box-shadow: var(--vertical-box-shadow);
+}
+
+/*** MAIN ***/
+.main {
+    height: var(--main-height);
+    background-color: var(--bg-main);
+    grid-area: main;
+    z-index: 10;
+}
+
+/*** FOOTER ***/
+.footer {
+    height: var(--footer-height);
+    grid-area: footer;
+    z-index: 40;
+}
+
+/*** MODAL ***/
+.modal{}
+.modal__confirmation {}
+.modal-container__upper{}
+.modal-container__lower{}
+.modal-dialog__question{}
+.modal-dialog__response{}
+.modal__task{}
+
+
+/***** MEDIA QUERIES *****/
