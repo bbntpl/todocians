@@ -1,5 +1,5 @@
-function _addClassNames(el, classes) {
-    Array.isArray(className) ? el.classList.add(...classes) : el.classList.add(classes);
+function _addClassNames(el, clsNames) {
+    Array.isArray(clsNames) ? el.classList.add(...clsNames) : el.classList.add(clsNames);
 }
 
 function appendChildren(parent, children) {
@@ -15,6 +15,12 @@ function createEl(tag, className, txt = null) {
     //set text content equal to passed text
     el.textContent = txt ? txt : '';
     return el;
+}
+
+function createImg(tag, className, src) {
+    const img = createEl(tag, className);
+    img.src = src;
+    return img;
 }
 
 function childrenMatches(elem, callback) {
@@ -39,4 +45,4 @@ function autoExpand(field) {
 
 const currentYear = new Date().getFullYear();
 const uniqueID = () => Math.floor(Math.random() * Math.floor(Math.random() * Date.now()));
-export { appendChildren, autoExpand, childrenMatches, createEl, currentYear, uniqueID }
+export { appendChildren, autoExpand, childrenMatches, createEl, createImg, currentYear, uniqueID }
