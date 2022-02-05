@@ -10,11 +10,11 @@ const DOMController = (() => {
             document.documentElement.style.setProperty('--sidebar-width', '280px');
         }
     }
-    const addFolderTab = () => {
+    const renderFolderTab = () => {
 
     }
 
-    const addTask = () => {
+    const renderTask = () => {
 
     }
 
@@ -30,6 +30,8 @@ const DOMController = (() => {
 
     }
 
+    //mock up elements
+    const initialize
     return {
         toggleSidebar
     }

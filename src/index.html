@@ -12,7 +12,7 @@
 
 <body>
     <!-- <div class="ribbon"> -->
-        <!-- <div class="collapse-wrapper">
+    <!-- <div class="collapse-wrapper">
             <img class="ribbon-icons" src='./assets/icons/chevron-right.svg' />
         </div>
         <div class="ribbon-folders">
@@ -21,7 +21,7 @@
         </div> -->
     <!-- </div> -->
     <!-- <div class="sidebar"> -->
-        <!-- <img class='logo' src='/assets/images/logo.svg' />
+    <!-- <img class='logo' src='/assets/images/logo.svg' />
         <div class="sidebar__inner">
             <div class="searchbar">
                 <img class="searchbar-icon" src="./assets/icons/magnify.svg" />
@@ -39,12 +39,23 @@
                     <div class="folder__list">
                         <div class="folder__tab">
                             <div class="tab-title">
-                                <img src="./assets/icons/tag.svg" />
+                                <img class="tab-icon" src="./assets/icons/tag.svg" />
                                 <p class="tab-name">Project 01</p>
                             </div>
                             <div class="row-items-holder">
-                                <img src="./assets/icons/edit.svg" />
-                                <img src="./assets/icons/trash.svg" />
+                                <img class="tab-icon" src="./assets/icons/edit.svg" />
+                                <img class="tab-icon" src="./assets/icons/trash.svg" />
+                            </div>
+                        </div>
+                        <div class="folder__tab">
+                            <div class="tab-title">
+                                <img class="tab-icon" src="./assets/icons/tag.svg" />
+                                <p class="tab-name">Project 01</p>
+                                <div class="total-tags"></div>
+                            </div>
+                            <div class="row-items-holder">
+                                <img class="tab-icon" src="./assets/icons/edit.svg" />
+                                <img class="tab-icon" src="./assets/icons/trash.svg" />
                             </div>
                         </div>
                     </div>
@@ -53,10 +64,10 @@
         </div> -->
     <!-- </div> -->
     <!-- <header class='header'> -->
-        <!-- <h1 class="project__title--large">Project 01</h1> -->
+    <!-- <h1 class="project__title--large">Project 01</h1> -->
     <!-- </header> -->
     <!-- <main class="main"> -->
-        <!-- <div class="task-handler__options">
+    <!-- <div class="task-handler__options">
             <button class="add-task-btn"></button>
             <select class="task-filter-btn">
                 <option></option>
@@ -105,7 +116,7 @@
         </div> -->
     <!-- </main> -->
     <!-- <footer class='footer'> -->
-        <!-- <p class="footer-content">© The B.B. Antipolo 2022</p> -->
+    <!-- <p class="footer-content">© The B.B. Antipolo 2022</p> -->
     <!-- </footer> -->
     <!-- <div class="modal">
         <div class="modal__confirmation">
@@ -123,8 +134,8 @@
             <form class="form__task">
                 <div class="modal-container__upper">
                     <div class="modal-dialog__header">
-                        <legend>Add task / edid task</legend>
-                        <div class="modal-container__dialog-response">
+                        <legend class="modal__task-label">Add task / edid task</legend>
+                        <div class="modal-dialog__response">
                             <button>Yes</button>
                             <button>No</button>
                         </div>
@@ -136,9 +147,11 @@
                 </div>
                 <div class="modal-container__lower">
                     <fieldset class="modal-dialog__inputs">
-                        <label>Task Checklist: <input type="text"/></label>
+                        <label>Task Checklist: <div class="form__checklist"><input type="text"/></div></label>
                         <label>Task Due Date: <input type="date"/></label>
-                        <button>Delete</button>
+                        <div class="modal-dialog__response">
+                            <button class=''>Delete</button>
+                        </div>
                     </fieldset>
                 </div>
             </form>

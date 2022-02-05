@@ -23,6 +23,17 @@ function createImg(tag, className, src) {
     return img;
 }
 
+function createElWithProps(tag, className, args) {
+    const el = document.createElement(tag);
+
+    //add classnames to the element
+    _addClassNames(el, className);
+
+    //initialize properties of an element
+    args.forEach(entry => el[entry[0]] = entry[1]);
+    return el;
+}
+
 function childrenMatches(elem, callback) {
     return Array.from(elem.children).filter(callback);
 }
