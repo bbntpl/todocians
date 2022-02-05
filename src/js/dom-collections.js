@@ -4,7 +4,7 @@ import {
     appendChildren
 } from '../helpers';
 
-import chevronRight from '../assets/icons/chevron-left.svg';
+import chevronLeft from '../assets/icons/chevron-left.svg';
 import prjIcon from '../assets/icons/project.svg';
 import tagIcon from '../assets/icons/tag.svg';
 import magnifyIcon from '../assets/icons/magnify.svg';
@@ -12,7 +12,9 @@ import logoImg from '../assets/images/logo.svg';
 import editIcon from '../assets/icons/edit.svg';
 import closeIcon from '../assets/icons/close.svg';
 import trashIcon from '../assets/icons/trash.svg';
+import DOMController from './dom-controller';
 
+//These are collection of DOM elements including event listeners
 const Sidebar = (() => {
     const _createLogo = () => createImg('img', 'logo', logoImg);
     const _createSearchbar = () => {
@@ -31,6 +33,10 @@ const Sidebar = (() => {
         const filterAZ = createEl('div', 'filter', 'A-Z');
         const filterCompleted = createEl('div', 'filter', 'Completed');
 
+        const filterTabs = [filterActive, filterAZ, filterCompleted];
+        filterTabs.forEach(e => {
+            e.addEventListener('click', DOMController.rmvActiveSiblings);
+        })
         appendChildren(organizerFilters, [filterActive, filterAZ, filterCompleted]);
 
         return organizerFilters;
@@ -48,19 +54,22 @@ const Sidebar = (() => {
     const createPrjTab = (text) => {
         const prjTab = createEl('div', 'folder__tab');
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', 'tab-name', text);
+        const tabName = createEl('p', ['tab-name', 'centered'], text);
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const editIconEl = createImg('img', 'tab-icon', editIcon);
         const trashIconEl = createImg('img', 'tab-icon', trashIcon);
+
         appendChildren(prjTab, [tabTitle, rowItemsHolder]);
         tabTitle.append(tabName);
         appendChildren(rowItemsHolder, [editIconEl, trashIconEl]);
+
+        prjTab.addEventListener('click', DOMController.rmvActiveSiblings);
         return prjTab;
     }
     const createTagTab = (text, numOfTags) => {
         const tagTab = createEl('div', 'folder__tab');
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', 'tab-name', text);
+        const tabName = createEl('p', ['tab-name', 'centered'], text);
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const tagIconEl = createImg('img', 'tab-icon', tagIcon);
         const totalTags = createEl('div', 'total-tags', numOfTags);
@@ -77,11 +86,6 @@ const Sidebar = (() => {
         appendChildren(sidebarEl, [_createLogo(), sidebarInnerEl]);
         appendChildren(sidebarInnerEl, [_createSearchbar(), _createFilters(), organizerEl]);
         appendChildren(organizerEl, [_createFolder()]);
-
-        /* TEST */
-        // const folderList = document.querySelector('.folder__list');
-        // console.log(document.querySelector('.sidebar__inner'));
-        // appendChildren(folderList, [createPrjTab('Project 01'), createPrjTab('Project 01')]);
         return sidebarEl;
     }
     return { initialize, createPrjTab, createTagTab };
@@ -89,8 +93,9 @@ const Sidebar = (() => {
 const Ribbon = (() => {
     const _createCollapseBtn = () => {
         const collapseBtn = createEl('div', 'collapse-wrapper');
-        const collapseIcon = createImg('img', 'ribbon-icons', chevronRight);
+        const collapseIcon = createImg('img', 'ribbon-icons', chevronLeft);
         collapseBtn.append(collapseIcon);
+        collapseBtn.addEventListener('click', (e) => DOMController.toggleSidebar(e));
         return collapseBtn;
     }
 
@@ -98,6 +103,9 @@ const Ribbon = (() => {
         const ribbonFolders = createEl('div', 'ribbon-folders');
         const prjIconEl = createImg('img', 'ribbon-icons', prjIcon);
         const tagIconEl = createImg('img', 'ribbon-icons', tagIcon);
+        [prjIconEl, tagIconEl].forEach(e => {
+            e.addEventListener('click', DOMController.rmvActiveSiblings);
+        })
         appendChildren(ribbonFolders, [prjIconEl, tagIconEl]);
         return ribbonFolders;
     }
@@ -114,7 +122,7 @@ const Ribbon = (() => {
 const Header = (() => {
     const initialize = () => {
         const headerEl = createEl('header', 'header');
-        const projectTitle = createEl('h1', 'project__title--large', 'Project 01');
+        const projectTitle = createEl('h1', 'project__title--large', '');
         headerEl.append(projectTitle);
         return headerEl;
     }

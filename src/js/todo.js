@@ -1,11 +1,16 @@
+import { appendChildren } from "../helpers";
 import { Sidebar } from "./dom-collections";
+import { Project } from "./project";
 
 const Todo = (() => {
+    const _projects = [];
     const initialize = () => {
-        document.querySelector('.folder__list').append(Sidebar.createPrjTab('P1'));
+        appendChildren(document.querySelector('.folder__list'), [Sidebar.createPrjTab('P1'), Sidebar.createPrjTab('P2'), Sidebar.createPrjTab('P3')]);
     }
-
-    return { initialize} ;
+    const addProject = (prjName) => {
+        _projects.push(new Project(prjName));
+    }
+    return { initialize, addProject };
 })();
 
 

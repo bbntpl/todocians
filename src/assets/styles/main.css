@@ -2,14 +2,18 @@
 :root {
     --default-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
     --color-cape-cod: #3A3E3F;
+    --filtered-cape-cod: invert(22%) sepia(0%) saturate(1898%) hue-rotate(242deg) brightness(91%) contrast(86%);
     --color-shark: #292C2E;
+    --filtered-shark: #invert(14%) sepia(8%) saturate(460%) hue-rotate(160deg) brightness(97%) contrast(92%);
     --color-nobel: #BCB7B7;
     --filtered-nobel: invert(85%) sepia(10%) saturate(85%) hue-rotate(314deg) brightness(90%) contrast(79%);
     --color-thunderbird: #B91C1C;
+    --filtered-thunderbitd: invert(14%) sepia(70%) saturate(3281%) hue-rotate(350deg) brightness(117%) contrast(92%);
     --color-flamingo: #EF4444;
     --filtered-flamingo: invert(42%) sepia(57%) saturate(6877%) hue-rotate(341deg) brightness(104%) contrast(95%);
     --color-athens-gray: #F4F4F5;
     --filtered-athens-gray: invert(97%) sepia(2%) saturate(2513%) hue-rotate(147deg) brightness(113%) contrast(95%);
+    --filtered-white: invert(100%) sepia(0%) saturate(2%) hue-rotate(248deg) brightness(107%) contrast(101%);
     --vertical-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     --horizontal-box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);
     /** for modal buttons or modal corners **/
@@ -97,11 +101,15 @@ body>*:not(.sidebar, .ribbon, .modal) {
 .ribbon img {
     width: 100%;
     height: auto;
-    filter: invert(98%) sepia(1%) saturate(2247%) hue-rotate(316deg) brightness(80%) contrast(81%);
+    filter: var(--filtered-nobel);
+}
+
+.ribbon img.active {
+    filter: var(--filtered-flamingo);
 }
 
 .ribbon img:hover {
-    filter: invert(97%) sepia(2%) saturate(2513%) hue-rotate(147deg) brightness(113%) contrast(95%);
+    filter: var(--filtered-athens-gray);
 }
 
 .ribbon-folders {
@@ -201,6 +209,32 @@ body>*:not(.sidebar, .ribbon, .modal) {
     height: auto;
 }
 
+.folder__tab {
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    border-radius: var(--secondary-border-radius);
+    padding: 7px 10px 7px 15px;
+    margin-bottom: 3px;
+    transition: all .1s ease-in;
+}
+
+.folder__tab.active {
+    background-color: var(--color-flamingo);
+}
+
+.folder__tab:hover {
+    background-color: var(--color-cape-cod);
+}
+
+.folder__tab img {
+    filter: var(--filtered-white);
+}
+
+.tab-title, .row-items-holder {
+    display: flex;
+}
+
 /*** HEADER ***/
 .header {
     display: flex;
@@ -231,13 +265,14 @@ body>*:not(.sidebar, .ribbon, .modal) {
 .footer {
     height: var(--footer-height);
     grid-area: footer;
-    z-index: 40;
+    z-index: 50;
+    background-color: var(--color-cape-cod);
 }
 
 .footer-content {
     display: flex;
     justify-content: center;
-    color: var(--color-shark);
+    color: var(--color-athens-gray);
 }
 
 /*** MODAL ***/
@@ -331,12 +366,15 @@ body>*:not(.sidebar, .ribbon, .modal) {
     font-size: clamp(1rem, 1.1vw, 2rem);
     color: #fff;
 }
-.modal-dialog__header, .modal-dialog__inputs{
+
+.modal-dialog__header, .modal-dialog__inputs {
     padding: 12px 25px;
 }
-.modal-dialog__header{
+
+.modal-dialog__header {
     display: flex;
 }
+
 .modal__task .modal-container__lower {
     display: flex;
     justify-content: flex-end;
@@ -352,29 +390,32 @@ body>*:not(.sidebar, .ribbon, .modal) {
     color: white;
 }
 
-.modal__task .modal-container__upper button:hover{
+.modal__task .modal-container__upper button:hover {
     background-color: #fff;
     border: 0;
     padding: 10px 5px;
     font-size: clamp(1rem, 1vw, 2rem);
     color: var(--color-flamingo);
 }
-.modal__task-label{
+
+.modal__task-label {
     vertical-align: middle;
 }
-.modal-dialog__header{
+
+.modal-dialog__header {
     display: flex;
 }
-.modal-dialog__inputs  {
+
+.modal-dialog__inputs {
     display: flex;
     flex-direction: column;
     gap: 15px 0;
     font-size: clamp(.8rem, .7vw, 1.8rem);
 }
-.modal-dialog__inputs > label > *:not(button) {
+
+.modal-dialog__inputs>label>*:not(button) {
     display: block;
     width: 100%;
 }
-
 
 /***** MEDIA QUERIES *****/
