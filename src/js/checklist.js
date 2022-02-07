@@ -1,4 +1,4 @@
-import { uniqueID, isEmpty } from '../helpers';
+import { uniqueID } from '../helpers';
 
 export class Checklist {
     constructor(desc, completed) {

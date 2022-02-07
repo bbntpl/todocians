@@ -1,11 +1,11 @@
-import { uniqueID, isEmpty } from '../helpers';
+import { uniqueID } from '../helpers';
 import { Task } from './task';
 
 export class Project {
     constructor(title) {
         this._id = uniqueID();
         this._title = title;
-        this._tasks = tasks;
+        this._tasks = [];
     }
     setValue(val, newVal) {
         if (isEmpty) return;
@@ -24,7 +24,7 @@ export class Project {
     get tasks(){
         return this._tasks;
     }
-    set desc(title) {
+    set title(title) {
         setValue(this._title, title);
     }
     set tasks(task) {

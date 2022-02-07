@@ -2,23 +2,19 @@ import './assets/styles/reset.css';
 import './assets/styles/main.css';
 
 import { appendChildren } from './helpers';
-import Todo from './js/todo';
-import {
-    Sidebar,
-    Ribbon,
-    Header,
-    Main,
-    Footer,
-    Modal
-} from './js/dom-collections';
-
-const layoutEls = [
-    Sidebar.initialize(),
-    Ribbon.initialize(),
-    Header.initialize(),
-    Main.initialize(),
-    Footer.initialize(),
-    Modal.initialize()
-];
-appendChildren(document.body, layoutEls);
-Todo.initialize();
+import { initialMount } from './js/controller';
+console.log('before element render');
+import('./js/dom-collections')
+    .then((domCollections) => {
+        console.log('elements are now being added');
+        const layoutEls = [
+            domCollections.Sidebar.initialize(),
+            domCollections.Ribbon.initialize(),
+            domCollections.Header.initialize(),
+            domCollections.Main.initialize(),
+            domCollections.Footer.initialize(),
+            domCollections.Modal.initialize()
+        ];
+        appendChildren(document.body, layoutEls);
+        initialMount();
+    });

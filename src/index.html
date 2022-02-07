@@ -69,41 +69,52 @@
     <!-- <main class="main"> -->
     <!-- <div class="task-handler__options">
             <button class="add-task-btn"></button>
-            <select class="task-filter-btn">
-                <option></option>
+            <select name="task-filter" id="task-filter-btn">
+                <option value="scheduled">Scheduled</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
+        <div class="task-handler__empty-msg">You don't have any tasks.</div>
         <div class="task-handler__list">
             <div class="task-wrapper">
                 <div class="task-bar">
                     <div class="task-control">
                         <input class="task-control-input" type="checkbox" />
+                        <label for="task-control-input"></label>
                     </div>
                     <div class="task-inner">
                         <div class="task__details">
                             <section class="task__instruction">
                                 <h2 class="task__title">Task 01</h2>
-                                <p class="task__desc"></p>
+                                <article class="task__desc"></article>
                             </section>
                             <div class="task__tags">
-                                <div></div>
+                                <div class="task-tag"></div>
                             </div>
                         </div>
                         <div class="task__details--extra">
-                            <div class="task__due-date">
-
-                            </div>
+                            <dl class="task__due-date">
+                                <dt>
+                                    <img class="due-date-icon" />
+                                </dt>
+                                <dd class="due-date"></dd>
+                            </dl>
                             <div class="task__total-checklist"></div>
                             <div class="task-checklist-toggler"></div>
                         </div>
                     </div>
                 </div>
-                <div class="checklist-bar">
-                    <div class="task-control">
-                        <input class="task-control-input" type="checkbox" />
-                    </div>
-                    <div class="task-inner">
-                        <p class="task__desc">Finish this!</p>
+                <div class="checklist-wrapper">
+                    <div class="checklist-bar">
+                        <div class="checklist-control">
+                            <input class="checklist-control-input" type="checkbox" />
+                        </div>
+                        <div class="task-inner">
+                            <p class="task__title">Finish this!</p>
+                        </div>
                     </div>
                 </div>
             </div>

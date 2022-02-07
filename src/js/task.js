@@ -1,4 +1,4 @@
-import { uniqueID, isEmpty } from '../helpers';
+import { uniqueID } from '../helpers';
 import { Checklist } from './checklist';
 
 export class Task {

@@ -23,17 +23,22 @@ function createImg(tag, className, src) {
     return img;
 }
 
-function createElWithProps(tag, className, args) {
-    const el = document.createElement(tag);
-
-    //add classnames to the element
-    _addClassNames(el, className);
-
-    //initialize properties of an element
-    args.forEach(entry => el[entry[0]] = entry[1]);
-    return el;
+function createCustomElement(tag, classNames, attributes) {
+    const element = document.createElement(tag);
+    _addClassNames(element, classNames);
+    for (const name in attributes) {
+        element[name] = attributes[name];
+    }
+    return element;
 }
 
+function removeChildren(parent) {
+    parent.forEach(el => {
+        while (el.firstChild) {
+            el.removeChild(el.firstChild);
+        }
+    });
+}
 function childrenMatches(elem, callback) {
     return Array.from(elem.children).filter(callback);
 }
@@ -56,4 +61,4 @@ function autoExpand(field) {
 
 const currentYear = new Date().getFullYear();
 const uniqueID = () => Math.floor(Math.random() * Math.floor(Math.random() * Date.now()));
-export { appendChildren, autoExpand, childrenMatches, createEl, createImg, currentYear, uniqueID }
+export { appendChildren, autoExpand, childrenMatches, createEl, createCustomElement, createImg, currentYear, removeChildren, uniqueID }
