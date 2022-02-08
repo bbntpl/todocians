@@ -2,7 +2,7 @@ import { Sidebar, Modal } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
-import { appendChildren } from '../helpers';
+import { appendChildren, createCustomElement } from '../helpers';
 
 //These functions changes the properties of elements
 //They're primarily for UI elements manipulation
@@ -14,45 +14,57 @@ const DOMController = (() => {
 
     const toggleSidebar = (e) => {
         _isSidebarCollapsed = !_isSidebarCollapsed;
-        if (_isSidebarCollapsed) {
-            e.target.src = chevronRight;
-            document.documentElement.style.setProperty('--sidebar-width', '0px');
-        } else {
-            e.target.src = chevronLeft;
-            document.documentElement.style.setProperty('--sidebar-width', '280px');
-        }
+        _isSidebarCollapsed ? _showSidebar(e) : _hideSidebar(e);
     }
+
+    const _showSidebar = (e) => {
+        e.target.src = chevronLeft;
+        document.documentElement.style.setProperty('--sidebar-width', '280px');
+    }
+
+    const _hideSidebar = (e) => {
+        e.target.src = chevronRight;
+        document.documentElement.style.setProperty('--sidebar-width', '0px');
+    }
+
     const removeActiveChildNodes = (e) => {
-        const className = e.target.className.split(' ');
-        const siblings = document.querySelectorAll(`.${className[0]}`);
+        //main classname of an element
+        const mainClassName = e.target.className.split(' ');
+        const siblings = document.querySelectorAll(`.${mainClassName[0]}`);
         siblings.forEach(el => el.classList.remove('active'));
         e.target.classList.add('active')
     }
+
     const toggleActive = (e) => {
         e.target.classList.toggle('active');
+    }
+    const addActiveClassName = (el) => {
+        el.classList.add('active');
     }
     const emptyInput = (e) => {
         e.target.value = '';
         e.target.focus = true;
     }
-    const _renderFolder = (note, placeholder) => {
+
+    const _changeTextsOfFolder = (note, placeholder) => {
         const folderNote = document.querySelector('.folder__note');
         folderNote.textContent = note;
         const accumulatorEl = document.querySelector('.accumulator');
         accumulatorEl.placeholder = placeholder;
     }
+
     const switchFolder = (e) => {
         if (e.target.classList.contains('active')) return;
         removeActiveChildNodes(e);
         if (e.target.id === 'ribbon-project') {
             _selectedFolder = 'prj';
-            _renderFolder(_projectNote, 'Add Project');
+            _changeTextsOfFolder(_projectNote, 'Add Project');
         } else {
             _selectedFolder = 'tag';
-            _renderFolder(_tagNote, 'Add Tag')
+            _changeTextsOfFolder(_tagNote, 'Add Tag')
         }
     }
-    const getSelectedFolder = () => _selectedFolder;
+
     const renderProjects = (projects) => {
         const prjElements = [];
         const folder__list = document.querySelector('.folder__list');
@@ -76,30 +88,39 @@ const DOMController = (() => {
         appendChildren(folder__list, tagElements);
         return folder__list;
     }
+
     function removeAllChildNodes(parent) {
         while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
         }
     }
+
     const displayCurrentProject = (name) => {
         const projectName = document.querySelector('.project__title--large');
         projectName.textContent = name;
     }
-    const hideModal = () => {
-        const modal = document.querySelector('.modal');
-        modal.classList.remove('show-modal');
-        modal.classList.add('hide-modal');
-    }
-    const showModal = () => {
-        const modal = document.querySelector('.modal');
-        modal.classList.add('show-modal');
-        modal.classList.remove('hide-modal');
+
+    const addClassNameToParent = (e, className) => {
+        e.currentTarget.parentElement.classList.add(className);
     }
     const displayActionConfirmation = (action, item) => {
         const modal = document.querySelector('.modal');
         modal.append(Modal.createActionConfirmation(action, item));
     }
+
+    const getSelectedFolder = () => _selectedFolder;
+
     const getProjectNote = () => _projectNote;
+
+    const toggleEditInput = (el) => {
+        el.classList.toggle('hide');
+        el.focus = true;
+    }
+
+    const setObjProp = () => {
+
+    }
+
     const renderTask = () => {
 
     }
@@ -115,21 +136,36 @@ const DOMController = (() => {
     const renderTasks = () => {
 
     }
+
+    const manuallyToggleTaskHandler = (hide) => {
+        const taskHandlerChildren
+            = document.querySelectorAll('.main > *');
+
+            taskHandlerChildren.forEach((el) => {
+            if (hide) {
+                el.classList.add('hide');
+            } else {
+                el.classList.remove('hide');
+            }
+        })
+    }
     return {
+        addActiveClassName,
+        addClassNameToParent,
         displayActionConfirmation,
         displayCurrentProject,
         emptyInput,
         getProjectNote,
         getSelectedFolder,
-        hideModal,
         renderProjects,
         renderTags,
         removeAllChildNodes,
         removeActiveChildNodes,
-        showModal,
         switchFolder,
         toggleActive,
+        toggleEditInput,
         toggleSidebar,
+        manuallyToggleTaskHandler,
     }
 })();
 

@@ -34,7 +34,8 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Stop procrastinating now!',
+            favicon: './src/assets/images/favicon.png',
+            title: 'For procrastinators...',
             template: './src/index.html'
         })
     ],

@@ -26,8 +26,10 @@ export class Project {
     }
     set name(name) {
         setValue(this._name, name);
+        return this;
     }
     set tasks(task) {
         setValue(this._tasks, task);
+        return this;
     }
 }

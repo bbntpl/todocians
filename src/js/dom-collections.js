@@ -6,14 +6,18 @@ import {
 } from '../helpers';
 
 import {
-    addFolderTab,
     deleteDatabase,
-    displayFilteredFolder,
     removeFolderTab,
-    selectFolderFilter,
     switchFolder,
+    switchFilterTab,
+    getInputValueOnEnter,
+    selectProjectTab,
+    removeProjectTabAndView,
+    toggleTagTabSelection,
+    toggleEditInput,
+    editProjectTab,
+    customAlert,
 } from './controller';
-import Todo from './todo';
 import DOMController from './dom-controller';
 
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -34,8 +38,11 @@ const Sidebar = (() => {
         const searchbarEl = createEl('div', 'searchbar');
         const magnifyIconEl = createImg('img', 'searchbar-icon', magnifyIcon);
         const searchbarInput = createEl('input', 'searchbar-input');
+
         searchbarInput.id = 'prj-search';
+
         appendChildren(searchbarEl, [magnifyIconEl, searchbarInput]);
+
         return searchbarEl;
     }
     const _createFilters = () => {
@@ -59,12 +66,11 @@ const Sidebar = (() => {
         });
 
         const filterTabs = [filterAll, filterAZ, filterSize, filterFinished];
+
         appendChildren(organizerFilters, filterTabs);
 
-        filterTabs.forEach(e => e.addEventListener('click', (event) => {
-            selectFolderFilter(event);
-            displayFilteredFolder();
-        }));
+        filterTabs.forEach(e => e.addEventListener('click', switchFilterTab));
+
         return organizerFilters;
     }
     const _createFolder = () => {
@@ -75,33 +81,47 @@ const Sidebar = (() => {
             placeholder: 'Add Project'
         });
         const folderListEl = createEl('div', 'folder__list');
+
         appendChildren(folderEl, [folderNote, accumulatorInput, folderListEl]);
 
-        accumulatorInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-                addFolderTab(e);
-            }
-        });
+        accumulatorInput.addEventListener('keypress', getInputValueOnEnter);
+
         return folderEl;
     }
     const createPrjTab = ({ name, index, id }) => {
         const prjTab = createEl('div', 'folder__tab');
         const tabTitle = createEl('div', 'tab-title');
         const tabName = createEl('p', ['tab-name', 'centered'], name);
+        const tabInput = createCustomElement('input', ['edit-input', 'hide'], {
+            type: 'text',
+            autofocus: true
+        });
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const editIconEl = createImg('img', 'tab-icon', editIcon);
         const trashIconEl = createImg('img', 'tab-icon', trashIcon);
-        appendChildren(prjTab, [tabTitle, rowItemsHolder]);
-        tabTitle.append(tabName);
-        appendChildren(rowItemsHolder, [editIconEl, trashIconEl]);
 
-        prjTab.addEventListener('click', () => {
-            DOMController.removeActiveChildNodes.bind(index);
-            Todo.setCurrentProject(id);
+        appendChildren(prjTab, [tabTitle, tabInput, rowItemsHolder]);
+        appendChildren(tabTitle, [tabName]);
+        appendChildren(rowItemsHolder, [editIconEl, trashIconEl]);
+        tabInput.addEventListener('keypress', function (e) {
+            editProjectTab(e, {id: id, inputEl: e.target, nameEl: tabName});
         });
-        trashIconEl.addEventListener('click', () => {
-            removeFolderTab(id)
+        prjTab.addEventListener('click', function (e) {
+            if(e.target !== e.currentTarget) return;
+            selectProjectTab(e, id);
         });
+        editIconEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleEditInput(tabInput, tabName);
+        });
+        trashIconEl.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const action = 'delete';
+            const item = name;
+            const customAlertArgs = { action, item, id };
+            customAlert(customAlertArgs, removeProjectTabAndView);
+        });
+
         return prjTab;
     }
     const createTagTab = ({ name, index, id, numOfTags }) => {
@@ -116,26 +136,29 @@ const Sidebar = (() => {
         appendChildren(tabTitle, [tagIconEl, tabName, totalTags]);
         rowItemsHolder.append(removeIconEl);
 
-        tagTab.addEventListener('click', () => {
-            DOMController.toggleActive.bind(index);
-            if (tagTab.classList.contains('active')) {
-                Todo.pushActiveTags(id);
-            } else {
-                Todo.deselectTag(id);
-            }
+        tagTab.addEventListener('click', (e) => {
+            toggleTagTabSelection(e, id);
         });
-        removeIconEl.addEventListener('click', () => {
-            removeFolderTab(id)
+
+        removeIconEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = 'delete';
+            const item = name;
+            const customAlertArgs = { action, item, id };
+            customAlert(customAlertArgs, removeFolderTab);
         });
+
         return tagTab;
     }
     const initialize = () => {
         const sidebarEl = createEl('div', 'sidebar');
         const sidebarInnerEl = createEl('div', 'sidebar__inner');
         const organizerEl = createEl('div', 'organizer');
+
         appendChildren(sidebarEl, [_createLogo(), sidebarInnerEl]);
         appendChildren(sidebarInnerEl, [_createSearchbar(), _createFilters(), organizerEl]);
         appendChildren(organizerEl, [_createFolder()]);
+
         return sidebarEl;
     }
     return { initialize, createPrjTab, createTagTab };
@@ -145,7 +168,7 @@ const Ribbon = (() => {
         const collapseBtn = createEl('div', 'collapse-wrapper');
         const collapseIcon = createImg('img', 'ribbon-icons', chevronLeft);
         collapseBtn.append(collapseIcon);
-        collapseBtn.addEventListener('click', (e) => DOMController.toggleSidebar(e));
+        collapseBtn.addEventListener('click', DOMController.toggleSidebar);
         return collapseBtn;
     }
 
@@ -159,22 +182,37 @@ const Ribbon = (() => {
             src: tagIcon,
             id: 'ribbon-tag'
         });
-        [prjIconEl, tagIconEl].forEach(e => {
-            e.addEventListener('click', switchFolder);
-        })
+
         appendChildren(ribbonFolders, [prjIconEl, tagIconEl]);
+
+        [prjIconEl, tagIconEl].forEach(folderIcon => {
+            folderIcon.addEventListener('click', switchFolder);
+        })
+
         return ribbonFolders;
     }
+
     const _removeDatabaseBtn = () => {
         const databaseRemovalBtn = createEl('div', 'data-remove-wrapper');
         const databaseRemovalIconEl = createImg('img', 'data-remove', databaseRemovalIcon);
+
         databaseRemovalBtn.append(databaseRemovalIconEl);
-        databaseRemovalBtn.addEventListener('click', deleteDatabase);
+
+        databaseRemovalBtn.addEventListener('click', function () {
+            const customAlertArgs = {action: 'delete', item: 'the database'}
+            customAlert(customAlertArgs, deleteDatabase);
+        });
         return databaseRemovalBtn;
     }
     const initialize = () => {
         const ribbonEl = createEl('div', 'ribbon');
-        appendChildren(ribbonEl, [_createCollapseBtn(), _createRibbonBtns(), _removeDatabaseBtn()]);
+        const ribbonChildren = [
+            _createCollapseBtn(),
+            _createRibbonBtns(),
+            _removeDatabaseBtn()
+        ]
+
+        appendChildren(ribbonEl, ribbonChildren);
         return ribbonEl;
     }
 
@@ -216,13 +254,22 @@ const Main = (() => {
             text: 'Completed',
             value: 'completed'
         })
-        const taskOptions = [optionScheduled, optionToday, optionWeek, optionMonth, optionCompleted];
+
+        const taskOptions = [
+            optionScheduled,
+            optionToday,
+            optionWeek,
+            optionMonth,
+            optionCompleted
+        ];
+
         appendChildren(taskFilterEl, taskOptions);
         return taskFilterEl;
     }
     const _createTaskHandlerOptions = () => {
         const taskHandlerOptionsEl = createEl('div', 'task-handler__options');
         const addTaskBtn = createEl('button', 'add-task-btn', 'Add task');
+
         appendChildren(taskHandlerOptionsEl, [addTaskBtn, _createTaskFilterSelect()]);
         return taskHandlerOptionsEl;
     }
@@ -242,7 +289,6 @@ const Main = (() => {
         const taskControlLabel = createCustomElement('label', 'task-control-label', {
             for: 'checkbox',
         })
-        taskControlLabel.setAttribute('for', 'checkbox');
         const taskInner = createEl('div', 'task-inner');
         const taskDetails = createEl('div', 'task__details');
         const taskInstruction = createEl('section', 'task__instruction');
@@ -261,6 +307,9 @@ const Main = (() => {
         const taskChecklistToggler = createEl('div', 'task-checklist-toggler');
 
         const checklistWrapper = createEl('div', 'checklist-wrapper');
+
+        taskControlLabel.setAttribute('for', 'checkbox');
+
 
         appendChildren(taskWrapper, [taskBar, checklistWrapper]);
         appendChildren(taskBar, [taskControl, taskInner]);
@@ -294,22 +343,27 @@ const Main = (() => {
     const initialize = () => {
         const mainEl = createEl('main', 'main');
         const taskHandlerList = _createTaskHandlerList();
-        appendChildren(mainEl,
-            [_createTaskHandlerOptions(),
-                emptyTaskMsg,
-                taskHandlerList
-            ]);
+
+        const mainElementChildren = [
+            _createTaskHandlerOptions(),
+            emptyTaskMsg,
+            taskHandlerList
+        ]
+
+        appendChildren(mainEl, mainElementChildren);
         appendChildren(taskHandlerList, [createTask(), createTask()]);
+
         return mainEl;
     };
     return { initialize, createTask, createTaskTag, checklistBar };
 })();
 const Modal = (() => {
     const createActionConfirmation = (action, item) => {
+        const txtQuestion = `Are you sure you want to ${action} ${item}`;
+
         const modalConfirmation = createEl('div', 'modal__confirmation');
         const modalContainerUpper = createEl('div', 'modal-container__upper');
         const modalContainerLower = createEl('div', 'modal-container__lower');
-        const txtQuestion = `Are you sure you want to ${action} ${item}`;
         const modalDialogQuestion = createEl('p', 'modal-dialog__question', txtQuestion)
         const modalDialogResponse = createEl('div', 'modal-dialog__response');
         const yesBtn = createEl('button', 'response-btn', 'Yes');
@@ -319,6 +373,7 @@ const Modal = (() => {
         modalContainerUpper.append(modalDialogQuestion);
         modalContainerLower.append(modalDialogResponse);
         appendChildren(modalDialogResponse, [yesBtn, noBtn]);
+
         return modalConfirmation;
     }
     function createModalTask() {
@@ -330,7 +385,6 @@ const Modal = (() => {
 
         const modalDialogHeader = createEl('div', 'modal-dialog__header');
         const modalTaskLabel = createEl('legend', 'modal__task-label');
-        modalTaskLabel.textContent = 'Task Todo';
         const modalDialogResponse = createEl('div', 'modal-dialog__response');
         const yesBtn = createEl('button', 'response-btn', 'Save');
         const noBtn = createEl('button', 'response-btn', 'Cancel');
@@ -350,6 +404,8 @@ const Modal = (() => {
         const inputChecklist = createEl('input', 'form__input');
         const inputDueDate = createEl('input', 'form__input');
 
+        modalTaskLabel.textContent = 'Task Todo';
+
         lblTitle.append(inputTitle);
         lblDesc.append(inputDesc);
         lblChecklist.append(inputChecklist);
@@ -368,9 +424,7 @@ const Modal = (() => {
         appendChildren(fieldsetTaskMoreDetails, [lblChecklist, lblDueDate, deleteTaskBtn]);
         return modalEl;
     }
-    //function createTaskChecklists()
-    //function createFieldset() {}
-    const initialize = () => createEl('div', ['modal', 'hide-modal']);
+    const initialize = () => createEl('div', ['modal', 'hide']);
     return {
         initialize,
         createActionConfirmation,
@@ -384,7 +438,9 @@ const Footer = (() => {
             textContent: '© B.B. Antipolo ' + new Date().getFullYear(),
             href: 'https://github.com/bvrbryn445'
         });
+
         footerEl.append(footerContent);
+
         return footerEl;
     }
     return { initialize };
