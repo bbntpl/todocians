@@ -2,53 +2,67 @@ import DOMController from './dom-controller';
 import Todo from './todo';
 
 export const addFolderTab = (e) => {
-    if(!e.target.value) return;
+    const tabName = e.target.value;
+    if (!alphabetRegex(tabName)) return;
     const selectedFolder = DOMController.getSelectedFolder();
-    if(selectedFolder === 'prj'){
+
+    if (selectedFolder === 'prj') {
         Todo.addProject(e.target.value);
-        displayProjects();
     } else {
         Todo.addTag(e.target.value);
-        displayTags();
     }
+    displayFilteredFolder();
     DOMController.emptyInput(e);
 }
+const alphabetRegex = (str) => /^[a-zA-Z](.|\s)*$/.test(str);
 export const deleteDatabase = () => {
     Todo.deleteData();
-    console.log(Todo.getProjects());
     removeFolderList();
 }
-export const displayProjects = () => {
+export const displayProjects = (filterName = null) => {
     removeFolderList();
-    const projects = Todo.getProjects();
+    const projects = Todo.getFilteredProjects(filterName);
     DOMController.renderProjects(projects);
 }
-export const displayTags = () => {
+export const displayTags = (filterName = null) => {
     removeFolderList();
-    const tags = Todo.getTags();
+    const tags = Todo.getFilteredTags(filterName);
     DOMController.renderTags(tags);
 }
 export const removeFolderList = () => {
     const parentEl = document.querySelector('.folder__list');
     DOMController.removeAllChildNodes(parentEl);
 }
-export const removeFolderTab = (i) => {
+export const removeFolderTab = (id) => {
+    const { deleteProject, deleteTag } = Todo;
     const selectedFolder = DOMController.getSelectedFolder();
-    if(selectedFolder === 'prj'){
-        Todo.deleteProject(i);
-        displayProjects();
-    } else {
-        Todo.deleteTag(i);
-        displayTags();
-    }
+    selectedFolder === 'prj' ? deleteProject(id) : deleteTag(id);
+    displayFilteredFolder();
 }
 export const switchFolder = (e) => {
     DOMController.switchFolder(e);
-    const selectedFolder = DOMController.getSelectedFolder();
-    selectedFolder === 'prj' ? displayProjects() : displayTags();
+    displayFilteredFolder();
 }
-
+export const selectFolderFilter = (e) => {
+    DOMController.removeActiveChildNodes(e);
+    Todo.setFolderFilter(e.target.id);
+    displayFilteredFolder();
+}
+export const displayFilteredFolder = () => {
+    const folderFilter = Todo.getFolderFilter();
+    const selectedFolder = DOMController.getSelectedFolder();
+    if (selectedFolder === 'prj') {
+        displayProjects(folderFilter);
+    } else if(selectedFolder === 'tag') {
+        displayTags(folderFilter);
+    } else {
+        throw new Error('Folder is an unknown type');
+    }
+}
+export const updateFilteredArrays = () => {
+    displayFilteredFolder();
+}
 export const initialMount = () => {
-    if(!Todo.getProjects()) return;
+    if (!Todo.getFilteredProjects()) return;
     displayProjects();
 }

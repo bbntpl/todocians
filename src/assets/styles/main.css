@@ -74,7 +74,7 @@ img, button, a, select, .task-bar {
 }
 
 /***** LAYOUT ELEMENTS *****/
-body>*:not(.sidebar, .ribbon, .modal) {
+body>*:not(.sidebar, .ribbon,.footer, .modal) {
     width: calc(100vw - var(--main-width));
 }
 
@@ -136,7 +136,7 @@ body>*:not(.sidebar, .ribbon, .modal) {
     width: var(--sidebar-width);
     box-shadow: var(--horizontal-box-shadow);
     overflow: auto;
-    z-index: 40;
+    z-index: 140;
 }
 
 .sidebar__inner {
@@ -246,6 +246,10 @@ body>*:not(.sidebar, .ribbon, .modal) {
     display: flex;
     align-items: center;
     gap: 0 5px;
+}
+
+.tab-name{
+    word-break: break-all;
 }
 
 /*** HEADER ***/
@@ -386,9 +390,12 @@ body>*:not(.sidebar, .ribbon, .modal) {
 }
 /*** FOOTER ***/
 .footer {
+    position: absolute;
+    bottom: 0;
     height: var(--footer-height);
+    width: 100%;
     grid-area: footer;
-    z-index: 50;
+    z-index: 150;
     background-color: var(--color-cape-cod);
 }
 
@@ -550,3 +557,12 @@ body>*:not(.sidebar, .ribbon, .modal) {
 }
 
 /***** MEDIA QUERIES *****/
+@media screen and (max-width: 950px){
+    .sidebar{
+        position: absolute;
+        left: var(--ribbon-width);
+    }
+    body>*:not(.sidebar, .ribbon, .footer, .modal) {
+        width: min(calc(100vw - var(--ribbon-width)));
+    }
+}

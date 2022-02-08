@@ -5,13 +5,15 @@ import {
     appendChildren
 } from '../helpers';
 
-import { 
-    addFolderTab, 
-    deleteDatabase, 
+import {
+    addFolderTab,
+    deleteDatabase,
+    displayFilteredFolder,
     removeFolderTab,
-    switchFolder 
+    selectFolderFilter,
+    switchFolder,
 } from './controller';
-
+import Todo from './todo';
 import DOMController from './dom-controller';
 
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -38,7 +40,6 @@ const Sidebar = (() => {
     }
     const _createFilters = () => {
         const organizerFilters = createEl('div', 'organizer__filter');
-
         //filter btns
         const filterAll = createCustomElement('div', ['filter', 'active'], {
             textContent: 'All',
@@ -48,25 +49,27 @@ const Sidebar = (() => {
             textContent: 'A-Z',
             id: 'folder-filter__az'
         });
-        const filterSize= createCustomElement('div', 'filter', {
+        const filterSize = createCustomElement('div', 'filter', {
             textContent: 'Size',
             id: 'folder-filter__size'
         });
-        const filterFinished= createCustomElement('div', 'filter', {
-            textContent: 'Finished',
-            id: 'folder-filter__finished'
+        const filterFinished = createCustomElement('div', 'filter', {
+            textContent: 'Inactive',
+            id: 'folder-filter__inactive'
         });
 
         const filterTabs = [filterAll, filterAZ, filterSize, filterFinished];
         appendChildren(organizerFilters, filterTabs);
-        filterTabs.forEach(e => {
-            e.addEventListener('click', DOMController.removeActiveChildNodes);
-        })
+
+        filterTabs.forEach(e => e.addEventListener('click', (event) => {
+            selectFolderFilter(event);
+            displayFilteredFolder();
+        }));
         return organizerFilters;
     }
     const _createFolder = () => {
         const folderEl = createEl('div', 'folder');
-        const folderNote = createEl('p', 'folder__note', 'Note: Simply \‘enter\’ on input to add a new project if it is not empty.');
+        const folderNote = createEl('p', 'folder__note', DOMController.getProjectNote());
         const accumulatorInput = createCustomElement('input', 'accumulator', {
             id: 'prj-accumulator',
             placeholder: 'Add Project'
@@ -81,24 +84,30 @@ const Sidebar = (() => {
         });
         return folderEl;
     }
-    const createPrjTab = (text, i) => {
+    const createPrjTab = ({ name, index, id }) => {
         const prjTab = createEl('div', 'folder__tab');
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', ['tab-name', 'centered'], text);
+        const tabName = createEl('p', ['tab-name', 'centered'], name);
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const editIconEl = createImg('img', 'tab-icon', editIcon);
         const trashIconEl = createImg('img', 'tab-icon', trashIcon);
         appendChildren(prjTab, [tabTitle, rowItemsHolder]);
         tabTitle.append(tabName);
         appendChildren(rowItemsHolder, [editIconEl, trashIconEl]);
-        prjTab.addEventListener('click', DOMController.removeActiveChildNodes.bind(i));
-        trashIconEl.addEventListener('click', removeFolderTab);
+
+        prjTab.addEventListener('click', () => {
+            DOMController.removeActiveChildNodes.bind(index);
+            Todo.setCurrentProject(id);
+        });
+        trashIconEl.addEventListener('click', () => {
+            removeFolderTab(id)
+        });
         return prjTab;
     }
-    const createTagTab = (text, i, numOfTags) => {
+    const createTagTab = ({ name, index, id, numOfTags }) => {
         const tagTab = createEl('div', 'folder__tab');
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', ['tab-name', 'centered'], text);
+        const tabName = createEl('p', ['tab-name', 'centered'], name);
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const tagIconEl = createImg('img', 'tab-icon', tagIcon);
         const totalTags = createEl('div', 'total-tags', `(${numOfTags})`);
@@ -106,8 +115,18 @@ const Sidebar = (() => {
         appendChildren(tagTab, [tabTitle, rowItemsHolder]);
         appendChildren(tabTitle, [tagIconEl, tabName, totalTags]);
         rowItemsHolder.append(removeIconEl);
-        tagTab.addEventListener('click', DOMController.toggleActive.bind(i));
-        removeIconEl.addEventListener('click', removeFolderTab);
+
+        tagTab.addEventListener('click', () => {
+            DOMController.toggleActive.bind(index);
+            if (tagTab.classList.contains('active')) {
+                Todo.pushActiveTags(id);
+            } else {
+                Todo.deselectTag(id);
+            }
+        });
+        removeIconEl.addEventListener('click', () => {
+            removeFolderTab(id)
+        });
         return tagTab;
     }
     const initialize = () => {
@@ -240,14 +259,14 @@ const Main = (() => {
         const taskExtraDetails = createEl('div', 'task__details--extra');
         const taskTotalChecklist = createEl('div', 'task__total-checklist');
         const taskChecklistToggler = createEl('div', 'task-checklist-toggler');
-        
+
         const checklistWrapper = createEl('div', 'checklist-wrapper');
 
         appendChildren(taskWrapper, [taskBar, checklistWrapper]);
         appendChildren(taskBar, [taskControl, taskInner]);
         appendChildren(taskControl, [taskControlInput, taskControlLabel]);
         appendChildren(taskInner, [taskDetails, taskExtraDetails]);
-        appendChildren(taskInstruction, [taskTitle, taskDesc, ]);
+        appendChildren(taskInstruction, [taskTitle, taskDesc,]);
         appendChildren(taskDueDate, [dueDateIconWrapper, dueDate]);
         dueDateIconWrapper.append(dueDateIcon);
         appendChildren(taskDetails, [taskInstruction, taskTags]);
@@ -280,7 +299,7 @@ const Main = (() => {
                 emptyTaskMsg,
                 taskHandlerList
             ]);
-            appendChildren(taskHandlerList, [createTask(), createTask()]);
+        appendChildren(taskHandlerList, [createTask(), createTask()]);
         return mainEl;
     };
     return { initialize, createTask, createTaskTag, checklistBar };

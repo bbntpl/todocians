@@ -2,9 +2,9 @@ import { uniqueID } from '../helpers';
 import { Task } from './task';
 
 export class Project {
-    constructor(title) {
+    constructor(name) {
         this._id = uniqueID();
-        this._title = title;
+        this._name = name;
         this._tasks = [];
     }
     setValue(val, newVal) {
@@ -18,14 +18,14 @@ export class Project {
     get id() {
         return this._id;
     }
-    get title() {
-        return this._title;
+    get name() {
+        return this._name;
     }
     get tasks(){
         return this._tasks;
     }
-    set title(title) {
-        setValue(this._title, title);
+    set name(name) {
+        setValue(this._name, name);
     }
     set tasks(task) {
         setValue(this._tasks, task);

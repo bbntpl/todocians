@@ -1,4 +1,4 @@
-import { Sidebar, Modal, Main } from './dom-collections';
+import { Sidebar, Modal } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -9,8 +9,8 @@ import { appendChildren } from '../helpers';
 const DOMController = (() => {
     let _isSidebarCollapsed = false;
     let _selectedFolder = 'prj'; //prj or tag
-    const projectNote = 'Note: Simply \‘enter\’ on input to add a new project if it is not empty.';
-    const tagNote = 'Note: You can select multiple tags to display the tasks that are associated with them.';
+    const _projectNote = 'Note: Simply \‘enter\’ on input to add a new project only if the characters are alphabet.';
+    const _tagNote = 'Note: You can select multiple tags to display the tasks that are associated with them.';
 
     const toggleSidebar = (e) => {
         _isSidebarCollapsed = !_isSidebarCollapsed;
@@ -46,10 +46,10 @@ const DOMController = (() => {
         removeActiveChildNodes(e);
         if (e.target.id === 'ribbon-project') {
             _selectedFolder = 'prj';
-            _renderFolder(projectNote, 'Add Project');
+            _renderFolder(_projectNote, 'Add Project');
         } else {
             _selectedFolder = 'tag';
-            _renderFolder(tagNote, 'Add Tag')
+            _renderFolder(_tagNote, 'Add Tag')
         }
     }
     const getSelectedFolder = () => _selectedFolder;
@@ -57,18 +57,20 @@ const DOMController = (() => {
         const prjElements = [];
         const folder__list = document.querySelector('.folder__list');
         projects.forEach((prj, i) => {
-            const title = prj._title;
-            const prjTab = Sidebar.createPrjTab(title, i);
+            const props = { name: prj._name, index: i, id: prj._id }
+            const prjTab = Sidebar.createPrjTab(props);
             prjElements.push(prjTab);
         });
         appendChildren(folder__list, prjElements);
         return folder__list;
     }
+
     const renderTags = (tags) => {
         const tagElements = [];
         const folder__list = document.querySelector('.folder__list');
         tags.forEach((tag, i) => {
-            const prjTab = Sidebar.createTagTab(tag, i, 1);
+            const props = { name: tag._name, index: i, id: tag._id, numOfTags: 1 }
+            const prjTab = Sidebar.createTagTab(props);
             tagElements.push(prjTab);
         });
         appendChildren(folder__list, tagElements);
@@ -79,9 +81,9 @@ const DOMController = (() => {
             parent.removeChild(parent.firstChild);
         }
     }
-    const displayCurrentProject = (title) => {
-        const projectTitle = document.querySelector('.project__title--large');
-        projectTitle.textContent = title;
+    const displayCurrentProject = (name) => {
+        const projectName = document.querySelector('.project__title--large');
+        projectName.textContent = name;
     }
     const hideModal = () => {
         const modal = document.querySelector('.modal');
@@ -97,6 +99,7 @@ const DOMController = (() => {
         const modal = document.querySelector('.modal');
         modal.append(Modal.createActionConfirmation(action, item));
     }
+    const getProjectNote = () => _projectNote;
     const renderTask = () => {
 
     }
@@ -112,15 +115,11 @@ const DOMController = (() => {
     const renderTasks = () => {
 
     }
-    // const initialize = () => {
-    //     const taskHandlerList = document.querySelector('.task-handler__list');
-    //     appendChildren(taskHandlerList, [Main.createTask(), Main.createTask()]);
-    //     return taskHandlerList;
-    // }
     return {
         displayActionConfirmation,
         displayCurrentProject,
         emptyInput,
+        getProjectNote,
         getSelectedFolder,
         hideModal,
         renderProjects,
