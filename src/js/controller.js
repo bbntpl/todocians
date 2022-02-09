@@ -1,3 +1,4 @@
+import { format, endOfDay } from 'date-fns'
 import DOMController from './dom-controller';
 import Todo from './todo';
 import swal from 'sweetalert';
@@ -10,6 +11,7 @@ export const addFolderTab = (tabName) => {
 export const deleteDatabase = () => {
     Todo.deleteData();
     removeFolderList();
+    DOMController.displayCurrentProject('');
 }
 
 export const displayProjects = (filterName = null) => {
@@ -64,6 +66,24 @@ export const hideTaskHandler = () => {
     DOMController.manuallyToggleTaskHandler(true);
 }
 
+
+export const isProjectAsActive = (id) => {
+    return Todo.getProjectId == id;
+}
+
+export const isTagActive = (id) => {
+    return Todo.getTagIds().find(id);
+}
+
+export const minAndMaxDates = (formatString) => {
+    const minDate = new Date();
+    const maxDate = new Date(864000000000000);
+
+    return {
+        min: format(minDate, formatString),
+        max: format(maxDate, formatString)
+    };
+}
 //EVENT CALLBACK FUNCTIONS
 export const switchFilterTab = (event) => {
     selectFolderFilter(event);
@@ -89,7 +109,7 @@ export const selectProjectTab = (event, id) => {
 }
 
 export const toggleTagTabSelection = (event, id) => {
-    const tagTab= event.target;
+    const tagTab = event.target;
     DOMController.toggleActive(event);
     if (tagTab.classList.contains('active')) {
         Todo.pushActiveTags(id);
@@ -146,25 +166,59 @@ export const customAlert = (props, callback) => {
             cancel: 'Cancel',
         },
     })
-    .then((outcome) => {
-        if(outcome){
-            callback(id);
-        }
-    });
+        .then((outcome) => {
+            if (outcome) {
+                callback(id);
+            }
+        });
 }
 
+export const alertEmptyDatabase = () => {
+    swal('The local storage is empty.', {
+        buttons: {
+            confirm: 'OK'
+        },
+        icon: "info",
+    })
+}
+
+export const alertDatabaseRemovalAction = () => {
+    if(Todo.getFilteredProjects().length){
+        const customAlertArgs = { action: 'delete', item: 'the database' }
+        customAlert(customAlertArgs, deleteDatabase);
+    } else {
+        alertEmptyDatabase();
+    }
+}
 
 export const updateTodoView = (event) => {
     DOMController.removeActiveChildNodes(event);
     writeHeaderText();
 }
 
+export const showTaskFormIfProjectIsActive = () => {
+    if (!Todo.getProjectId()) return
+    DOMController.showTaskForm();
+}
+
+export const addTaskToSelectedPrj = () => {
+
+}
+
+export const editTaskOfSelectedPrj = () => {
+    
+}
 //Initial mount
 const defaultDataToBeDisplayed = () => {
     selectFirstProjectTab();
     writeHeaderText();
 }
 
+const defaultTaskHandlerView = () => {
+    if (!Todo.getFilteredProjects()) {
+
+    }
+}
 export const initialMount = () => {
     if (!Todo.getFilteredProjects().length) return;
     displayProjects();

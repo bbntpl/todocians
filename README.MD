@@ -10,7 +10,11 @@ The design was inspired by habitica(especially the task modal).
 - Obsidian - for preparation, mostly for pseudocode, otherwise it is used to list all of the required factory functions or objects, todos, files, tools and other related concepts.
 
 **Development**
-- Material Icons
 - Webpack
+
+**Third-Party Libraries**
+- Material Icons
+- Sweet Alert
+- Date-fns
 
 ### Screenshot

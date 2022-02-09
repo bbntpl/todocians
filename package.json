@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/bvrbryn445/todocians#readme",
   "dependencies": {
+    "date-fns": "^2.28.0",
     "dotenv": "^16.0.0",
     "sweetalert": "^2.1.2"
   }

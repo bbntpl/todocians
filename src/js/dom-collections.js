@@ -2,11 +2,12 @@ import {
     createCustomElement,
     createEl,
     createImg,
-    appendChildren
+    appendChildren,
+    autoExpand
 } from '../helpers';
 
 import {
-    deleteDatabase,
+    alertDatabaseRemovalAction,
     removeFolderTab,
     switchFolder,
     switchFilterTab,
@@ -17,7 +18,11 @@ import {
     toggleEditInput,
     editProjectTab,
     customAlert,
+    showTaskFormIfProjectIsActive,
+    hideTaskForm,
+    minAndMaxDates
 } from './controller';
+import Todo from './todo';
 import DOMController from './dom-controller';
 
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -89,7 +94,10 @@ const Sidebar = (() => {
         return folderEl;
     }
     const createPrjTab = ({ name, index, id }) => {
-        const prjTab = createEl('div', 'folder__tab');
+        const prjTabClass = Todo.isProjectActive(id)
+            ? ['folder__tab', 'active'] : 'folder__tab';
+
+        const prjTab = createEl('div', prjTabClass);
         const tabTitle = createEl('div', 'tab-title');
         const tabName = createEl('p', ['tab-name', 'centered'], name);
         const tabInput = createCustomElement('input', ['edit-input', 'hide'], {
@@ -104,10 +112,10 @@ const Sidebar = (() => {
         appendChildren(tabTitle, [tabName]);
         appendChildren(rowItemsHolder, [editIconEl, trashIconEl]);
         tabInput.addEventListener('keypress', function (e) {
-            editProjectTab(e, {id: id, inputEl: e.target, nameEl: tabName});
+            editProjectTab(e, { id: id, inputEl: e.target, nameEl: tabName });
         });
         prjTab.addEventListener('click', function (e) {
-            if(e.target !== e.currentTarget) return;
+            if (e.target !== e.currentTarget) return;
             selectProjectTab(e, id);
         });
         editIconEl.addEventListener('click', (e) => {
@@ -125,7 +133,10 @@ const Sidebar = (() => {
         return prjTab;
     }
     const createTagTab = ({ name, index, id, numOfTags }) => {
-        const tagTab = createEl('div', 'folder__tab');
+        const tagTabClass = Todo.isTagActive(id)
+            ? ['folder__tab', 'active'] : 'folder__tab';
+
+        const tagTab = createEl('div', tagTabClass);
         const tabTitle = createEl('div', 'tab-title');
         const tabName = createEl('p', ['tab-name', 'centered'], name);
         const rowItemsHolder = createEl('div', 'row-items-holder');
@@ -198,10 +209,7 @@ const Ribbon = (() => {
 
         databaseRemovalBtn.append(databaseRemovalIconEl);
 
-        databaseRemovalBtn.addEventListener('click', function () {
-            const customAlertArgs = {action: 'delete', item: 'the database'}
-            customAlert(customAlertArgs, deleteDatabase);
-        });
+        databaseRemovalBtn.addEventListener('click', alertDatabaseRemovalAction);
         return databaseRemovalBtn;
     }
     const initialize = () => {
@@ -271,6 +279,8 @@ const Main = (() => {
         const addTaskBtn = createEl('button', 'add-task-btn', 'Add task');
 
         appendChildren(taskHandlerOptionsEl, [addTaskBtn, _createTaskFilterSelect()]);
+
+        addTaskBtn.addEventListener('click', showTaskFormIfProjectIsActive);
         return taskHandlerOptionsEl;
     }
     const emptyTaskMsg = createEl('div', 'task-handler__empty-msg', 'You don\'t have any tasks.');
@@ -278,6 +288,7 @@ const Main = (() => {
         const taskHandlerList = createEl('div', 'task-handler__list');
         return taskHandlerList;
     }
+
     const createTask = () => {
         const taskWrapper = createEl('div', 'task-wrapper');
         const taskBar = createEl('div', 'task-bar');
@@ -351,32 +362,72 @@ const Main = (() => {
         ]
 
         appendChildren(mainEl, mainElementChildren);
-        appendChildren(taskHandlerList, [createTask(), createTask()]);
-
         return mainEl;
     };
     return { initialize, createTask, createTaskTag, checklistBar };
 })();
 const Modal = (() => {
-    const createActionConfirmation = (action, item) => {
-        const txtQuestion = `Are you sure you want to ${action} ${item}`;
-
-        const modalConfirmation = createEl('div', 'modal__confirmation');
-        const modalContainerUpper = createEl('div', 'modal-container__upper');
-        const modalContainerLower = createEl('div', 'modal-container__lower');
-        const modalDialogQuestion = createEl('p', 'modal-dialog__question', txtQuestion)
-        const modalDialogResponse = createEl('div', 'modal-dialog__response');
-        const yesBtn = createEl('button', 'response-btn', 'Yes');
-        const noBtn = createEl('button', 'response-btn', 'No');
-
-        appendChildren(modalConfirmation, [modalContainerUpper, modalContainerLower]);
-        modalContainerUpper.append(modalDialogQuestion);
-        modalContainerLower.append(modalDialogResponse);
-        appendChildren(modalDialogResponse, [yesBtn, noBtn]);
-
-        return modalConfirmation;
+    const _createTitleInput = (title) => {
+        const lblTitle = createEl('label', 'form__label', 'Title: ');
+        const inputTitle = createCustomElement('input', 'form__input', {
+            required: true,
+            value: title
+        });
+        lblTitle.append(inputTitle);
+        return lblTitle;
     }
-    function createModalTask() {
+    const _createDescTextarea = (desc) => {
+        const lblDesc = createEl('label', 'form__label', 'Desc: ');
+        const inputDesc = createCustomElement('textarea', 'form__textarea',{
+            resize: 'none',
+            value: desc
+        });
+
+        lblDesc.append(inputDesc);
+        return lblDesc;
+    }
+
+    const _createChecklist = (checklists) => {
+        const checklistArray = [];
+        
+        const lblChecklist = createEl('label', 'form__label', 'Checklist: ');
+        const checklistWrapper = createEl('div', 'task-checklist-wrapper');
+        const inputChecklist = createEl('input', 'form__input');
+        const checklistList = createEl('ul', 'task-checklist');
+
+        lblChecklist.append(checklistWrapper);
+        appendChildren(checklistWrapper, [inputChecklist, checklistList]);
+
+        return lblChecklist;
+    }
+
+    const createChecklistItem = () => {
+        const checklistItem = createEl('li', 'task-checklist-item');
+        const minitaskCheckbox = createCustomElement('input', 'task-checklist-completed', {
+            type: 'checkbox',
+        })
+        const minitaskName = createEl('input', 'task-checklist-name', {
+            placeholder: 'Add new checklist'
+        });
+        const minitaskDeleteBtn = createImg('img', 'checklist-delete-btn', trashIcon);
+
+        appendChildren(checklistItem, [minitaskCheckbox, minitaskName, minitaskDeleteBtn]);
+
+        return checklistItem;
+    }
+
+    const _createDueDateInput = (value) => {
+        const lblDueDate = createEl('label', 'form__label', 'Due Date: ');
+        const inputDueDate = createCustomElement('input', 'form__input', {
+            type: 'date',
+            min: minAndMaxDates('yyyy-MM-dd').min,
+            max: minAndMaxDates('yyyy-MM-dd').max
+        });
+        lblDueDate.append(inputDueDate);
+        return lblDueDate;
+    }
+
+    function createModalTask(props = '') {
         const modalTask = createEl('div', 'modal__task');
         const formTask = createEl('form', 'form__task');
 
@@ -384,51 +435,60 @@ const Modal = (() => {
         const modalContainerLower = createEl('div', 'modal-container__lower');
 
         const modalDialogHeader = createEl('div', 'modal-dialog__header');
-        const modalTaskLabel = createEl('legend', 'modal__task-label');
+        const modalTaskLabel = createCustomElement('legend', 'modal__task-label', {
+            textContent: props.legend || 'Add todo'
+        });
         const modalDialogResponse = createEl('div', 'modal-dialog__response');
-        const yesBtn = createEl('button', 'response-btn', 'Save');
-        const noBtn = createEl('button', 'response-btn', 'Cancel');
-        const fieldsetTaskDetails = createEl('fieldset', 'modal-dialog__inputs');
+        const saveBtn = createCustomElement('button', 'response-btn', {
+            textContent: 'Save',
+            type: 'submit'
+        });
+        const cancelBtn = createEl('button', 'response-btn', 'Cancel');
 
-        const lblTitle = createEl('label', 'form__label', 'Title: ');
-        const lblDesc = createEl('label', 'form__label', 'Desc: ');
-
-        const inputTitle = createEl('input', 'form__input');
-        const inputDesc = createEl('textarea', 'form__textarea');
-
-        const fieldsetTaskMoreDetails = createEl('fieldset', 'modal-dialog__inputs');
-
-        const lblChecklist = createEl('label', 'form__label', 'Checklist: ');
-        const lblDueDate = createEl('label', 'form__label', 'Due Date: ');
-
-        const inputChecklist = createEl('input', 'form__input');
-        const inputDueDate = createEl('input', 'form__input');
-
-        modalTaskLabel.textContent = 'Task Todo';
-
-        lblTitle.append(inputTitle);
-        lblDesc.append(inputDesc);
-        lblChecklist.append(inputChecklist);
-        lblDueDate.append(inputDueDate);
-
+        const fieldsetPrimaryDetails = createEl('fieldset', 'modal-dialog__inputs');
+        const fieldsetSecondaryDetails = createEl('fieldset', 'modal-dialog__inputs');
         const deleteTaskBtn = createEl('button', 'modal-dialog__response', 'Delete');
 
-        modalEl.append(modalTask);
+        const primaryInputs = [
+            _createTitleInput(props.title || ''),
+            _createDescTextarea(props.desc || '')
+        ];
+        const secondaryInputs = [
+            _createChecklist(props.checklist || ''),
+            _createDueDateInput(props.dueDate || ''),
+            deleteTaskBtn
+        ];
+
         modalTask.append(formTask);
         appendChildren(formTask, [modalContainerUpper, modalContainerLower]);
-        appendChildren(modalContainerUpper, [modalDialogHeader, fieldsetTaskDetails]);
+        appendChildren(modalContainerUpper, [modalDialogHeader, fieldsetPrimaryDetails]);
         appendChildren(modalDialogHeader, [modalTaskLabel, modalDialogResponse]);
-        appendChildren(modalDialogResponse, [yesBtn, noBtn]);
-        modalContainerLower.append(fieldsetTaskMoreDetails);
-        appendChildren(fieldsetTaskDetails, [lblTitle, lblDesc]);
-        appendChildren(fieldsetTaskMoreDetails, [lblChecklist, lblDueDate, deleteTaskBtn]);
-        return modalEl;
+        appendChildren(modalDialogResponse, [saveBtn, cancelBtn]);
+        modalContainerLower.append(fieldsetSecondaryDetails);
+        appendChildren(fieldsetPrimaryDetails, primaryInputs);
+        appendChildren(fieldsetSecondaryDetails, secondaryInputs);
+
+        cancelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            DOMController.hideTaskForm();
+        });
+        return modalTask;
     }
-    const initialize = () => createEl('div', ['modal', 'hide']);
+    const initialize = () => {
+        const modalEl = createEl('div', ['modal-overlay', 'hide']);
+
+        modalEl.addEventListener('click', (e) => {
+            if (e.currentTarget !== e.target) return;
+            e.stopPropagation();
+            DOMController.hideTaskForm();
+        });
+
+        return modalEl;
+    };
     return {
         initialize,
-        createActionConfirmation,
-        createModalTask
+        createModalTask,
+        createChecklistItem
     };
 })();
 const Footer = (() => {

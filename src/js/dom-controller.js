@@ -2,7 +2,7 @@ import { Sidebar, Modal } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
-import { appendChildren, createCustomElement } from '../helpers';
+import { appendChildren  } from '../helpers';
 
 //These functions changes the properties of elements
 //They're primarily for UI elements manipulation
@@ -89,7 +89,49 @@ const DOMController = (() => {
         return folder__list;
     }
 
-    function removeAllChildNodes(parent) {
+    const renderListOfTasks = () => {
+        
+    }
+
+    const renderListOfChecklists = () => {
+
+    }
+
+    const showTaskForm = () => {
+        const modal = document.querySelector('.modal-overlay');
+        modal.classList.remove('hide');
+        const taskForm = Modal.createModalTask();
+        modal.append(taskForm);
+    }
+
+    const hideTaskForm = () => {
+        const modal = document.querySelector('.modal-overlay');
+        modal.removeChild(modal.firstChild);
+        modal.classList.add('hide');
+    }
+
+    const showAddTodoTexts = () => {
+        return {
+            legend: 'Add todo',
+            title: '',
+            desc: '',
+            checklist: [],
+            dueDate: ''
+        }
+    }
+
+    const showEditTodoTexts = (props) => {
+        const { title, desc, checklist, dueDate } = props;
+        return {
+            legend: 'Edit todo',
+            title: title,
+            desc: desc,
+            checklist: checklist,
+            dueDate: dueDate
+        }
+    }
+
+    const removeAllChildNodes = (parent) => {
         while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
         }
@@ -107,7 +149,6 @@ const DOMController = (() => {
         const modal = document.querySelector('.modal');
         modal.append(Modal.createActionConfirmation(action, item));
     }
-
     const getSelectedFolder = () => _selectedFolder;
 
     const getProjectNote = () => _projectNote;
@@ -157,10 +198,14 @@ const DOMController = (() => {
         emptyInput,
         getProjectNote,
         getSelectedFolder,
+        hideTaskForm,
         renderProjects,
         renderTags,
         removeAllChildNodes,
         removeActiveChildNodes,
+        showAddTodoTexts,
+        showEditTodoTexts,
+        showTaskForm,
         switchFolder,
         toggleActive,
         toggleEditInput,

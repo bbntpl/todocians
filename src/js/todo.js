@@ -5,6 +5,7 @@ import {
     getItemFromLocal,
     deleteLocalStorage
 } from "./storage";
+import { Task } from "./task";
 
 //DATABASE OF THE TODO APP
 const TODO_DATA = {
@@ -14,7 +15,7 @@ const TODO_DATA = {
     },
     filter: {
         task: '',
-        folder: ''
+        folder: 'scheduled'
     },
     filteredProjects: function (filterName) {
         const projects = [...this.projects];
@@ -116,11 +117,32 @@ const Todo = (() => {
         _data.projects[index]._name = newName;
         updateLocalStorage('projects', _data.projects);
     }
-    const newProjectAsActive = () => {
-        const { filter, filteredProjects } = _data;
-        const currentFilter = filter.folder;
-        const project = filteredProjects(currentFilter);
-        return 
+    const setTask = (id, props) => {
+        const { title, desc, checklist, dueDate } = props;
+        const prjIndex = findIndexOfObj(_data.projects, '_id', id);
+        const currentProjectTasks = _data.projects[prjIndex].tasks;
+        const newTask = new Task(title, desc, checklist, dueDate);
+        currentProjectTasks.push(newTask);
+    }
+    const editTask = (ids, props) => {
+        const { prjId, tskId } = ids;
+        const { title, desc, checklist, dueDate } = props;
+        const prjIndex = findIndexOfObj(_data.projects, '_id', prjId);
+        const tskIndex = findIndexOfObj(_data.projects[prjIndex], '_id', tskId);
+        
+        //update the task with the new received inputs
+        _data.projects[prjIndex].tasks[tskIndex]
+        .title(title)
+        .desc(desc)
+        .checklist(checklist)
+        .dueDate(dueDate)
+    }
+    const isProjectActive = (id) => {
+        return _data.active.projectId == id;
+    }
+
+    const isTagActive = (id) => {
+        return _data.active.tagIds.find(v => v == id);
     }
 
     const getFolderFilter = () => _data.filter.folder;
@@ -139,6 +161,8 @@ const Todo = (() => {
         }
     };
 
+    const getTagIds = () => _data.active.tagIds;
+
     const setFolderFilter = (id) => _data.filter.folder = id;
 
     const setTaskFilter = (id) => _data.filter.task = id;
@@ -151,16 +175,21 @@ const Todo = (() => {
         deleteProject,
         deleteTag,
         deselectTag,
+        editTask,
         findIndexOfObj,
         getAllTasks,
         getFilteredProjects,
         getFilteredTags,
         getFolderFilter,
         getProjectId,
+        getTagIds,
+        isProjectActive,
+        isTagActive,
         pushActiveTags,
         setFolderFilter,
         setProjectId,
         setProjectNameById,
+        setTask,
         setTaskFilter,
     };
 })();
