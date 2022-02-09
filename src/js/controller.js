@@ -10,25 +10,27 @@ export const addFolderTab = (tabName) => {
 
 export const deleteDatabase = () => {
     Todo.deleteData();
-    removeFolderList();
+    DOMController.removeFolderList();
     DOMController.displayCurrentProject('');
 }
 
 export const displayProjects = (filterName = null) => {
-    removeFolderList();
+    DOMController.removeFolderList();
     const projects = Todo.getFilteredProjects(filterName);
     DOMController.renderProjects(projects);
 }
 
 export const displayTags = (filterName = null) => {
-    removeFolderList();
+    DOMController.removeFolderList();
     const tags = Todo.getFilteredTags(filterName);
     DOMController.renderTags(tags);
 }
 
-export const removeFolderList = () => {
-    const parentEl = document.querySelector('.folder__list');
-    DOMController.removeAllChildNodes(parentEl);
+export const displayTasks = () => {
+    DOMController.removeListOfTasks();
+    const tasks = Todo.getTasks();
+    console.log(tasks);
+    DOMController.renderListOfTasks(tasks);
 }
 
 export const switchFolder = (e) => {
@@ -49,6 +51,10 @@ export const updateFolderView = () => {
     } else if (selectedFolder === 'tag') {
         displayTags(folderFilter);
     }
+}
+
+export const updateTaskHandlerView = () => {
+    displayTasks();
 }
 
 export const writeHeaderText = () => {
@@ -202,11 +208,52 @@ export const showTaskFormIfProjectIsActive = () => {
 }
 
 export const addTaskToSelectedPrj = () => {
+    const props = collectInputsFromTaskForm();
+    const prjIndex = Todo.getProjectId();
+    Todo.setTask(prjIndex, props);
+    DOMController.hideTaskForm();
+}
 
+export const collectInputsFromTaskForm = () => {
+    const title = document.getElementById('task-input-title');
+    const desc = document.getElementById('task-input-desc');
+    const dueDate = document.getElementById('task-input-duedate');
+    const checklist = collectChecklistFromTaskForm();
+    const tags = collectTagsFromTaskForm();
+    return{
+        title: title.value,
+        desc: desc.value,
+        dueDate: dueDate.value,
+        checklist,
+        tags
+    }
+}
+
+export const collectChecklistFromTaskForm = () => {
+    const cl = document.querySelectorAll('.task-checklist-name');
+    if(!cl.length) return [];
+    const clCbox = document.querySelectorAll('.task-checklist-completed');
+    return cl.reduce((arr, input, index) => {
+        const checklistObj = {
+            desc: input.value,
+            completed: clCbox[index].value
+        }
+        arr.push(checklistObj);
+    },[]);
+}
+
+export const collectTagsFromTaskForm = () => {
+    const tagCheckboxes = document.querySelectorAll('.ck-input');
+    const tags = Todo.getTags();
+    return tags.reduce((arr, tag, i) => {
+        if(tagCheckboxes[i].value) {
+            arr.push(tag);
+        }
+    }, [])
 }
 
 export const editTaskOfSelectedPrj = () => {
-    
+
 }
 //Initial mount
 const defaultDataToBeDisplayed = () => {
@@ -223,4 +270,5 @@ export const initialMount = () => {
     if (!Todo.getFilteredProjects().length) return;
     displayProjects();
     defaultDataToBeDisplayed();
+    console.log(Todo.getFilteredProjects());
 }

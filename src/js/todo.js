@@ -6,6 +6,7 @@ import {
     deleteLocalStorage
 } from "./storage";
 import { Task } from "./task";
+import { Checklist } from "./checklist";
 
 //DATABASE OF THE TODO APP
 const TODO_DATA = {
@@ -94,10 +95,10 @@ const Todo = (() => {
         return arr.findIndex(v => v[prop] === val);
     }
 
-    const getObjOfArray = (args) => {
-        const { id, array } = args;
-        findIndexOfObj()
-    }
+    // const getObjOfArray = (args) => {
+    //     const { id, array } = args;
+    //     findIndexOfObj()
+    // }
 
     const getAllTasks = () => {
         const projects = getFilteredProjects();
@@ -111,19 +112,43 @@ const Todo = (() => {
     const getFilteredTags = (filterName) => {
         return _data.filteredTags(filterName);
     }
+
+    const getTasks = () => {
+        const project = _data.projects;
+        const projectId = _data.active.projectId;
+        const prjIndex = findIndexOfObj(_data.projects, '_id', projectId);
+        return project[prjIndex]._tasks;
+    }
+
     const setProjectNameById = (e, id) => {
         const newName = e.target.value;
         const index = findIndexOfObj(_data.projects, '_id', id);
         _data.projects[index]._name = newName;
         updateLocalStorage('projects', _data.projects);
     }
+
     const setTask = (id, props) => {
-        const { title, desc, checklist, dueDate } = props;
+        const { title, desc, checklist, dueDate, tags } = props;
+        const { name, completed } = setChecklist(checklist);
         const prjIndex = findIndexOfObj(_data.projects, '_id', id);
-        const currentProjectTasks = _data.projects[prjIndex].tasks;
-        const newTask = new Task(title, desc, checklist, dueDate);
+        const currentProjectTasks = _data.projects[prjIndex]._tasks;
+        const newChecklist = new Checklist(name, completed);
+        const newTask = new Task(title, desc, newChecklist, dueDate, tags);
         currentProjectTasks.push(newTask);
+        
+        updateLocalStorage('projects', _data.projects);
     }
+
+    const setChecklist = (checklist) => {
+        return checklist.reduce((arr, obj) => {
+            const checklistItem = {
+                name: obj.desc,
+                completed: obj.completed
+            }
+            arr.push(checklistItem);
+        }, [])
+    }
+
     const editTask = (ids, props) => {
         const { prjId, tskId } = ids;
         const { title, desc, checklist, dueDate } = props;
@@ -136,7 +161,10 @@ const Todo = (() => {
         .desc(desc)
         .checklist(checklist)
         .dueDate(dueDate)
+
+        updateLocalStorage('projects', _data.projects);
     }
+
     const isProjectActive = (id) => {
         return _data.active.projectId == id;
     }
@@ -144,6 +172,8 @@ const Todo = (() => {
     const isTagActive = (id) => {
         return _data.active.tagIds.find(v => v == id);
     }
+
+    const getTags = () => _data.tags;
 
     const getFolderFilter = () => _data.filter.folder;
 
@@ -183,6 +213,8 @@ const Todo = (() => {
         getFolderFilter,
         getProjectId,
         getTagIds,
+        getTags,
+        getTasks,
         isProjectActive,
         isTagActive,
         pushActiveTags,

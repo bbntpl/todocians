@@ -1,4 +1,4 @@
-import { Sidebar, Modal } from './dom-collections';
+import { Sidebar, Modal, Main } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -67,30 +67,45 @@ const DOMController = (() => {
 
     const renderProjects = (projects) => {
         const prjElements = [];
-        const folder__list = document.querySelector('.folder__list');
+        const projectListEl = document.querySelector('.folder__list');
         projects.forEach((prj, i) => {
             const props = { name: prj._name, index: i, id: prj._id }
             const prjTab = Sidebar.createPrjTab(props);
             prjElements.push(prjTab);
         });
-        appendChildren(folder__list, prjElements);
-        return folder__list;
+        appendChildren(projectListEl, prjElements);
+        return projectListEl;
     }
 
     const renderTags = (tags) => {
         const tagElements = [];
-        const folder__list = document.querySelector('.folder__list');
+        const tagListEl = document.querySelector('.folder__list');
         tags.forEach((tag, i) => {
             const props = { name: tag._name, index: i, id: tag._id, numOfTags: 1 }
             const prjTab = Sidebar.createTagTab(props);
             tagElements.push(prjTab);
         });
-        appendChildren(folder__list, tagElements);
-        return folder__list;
+        appendChildren(tagListEl, tagElements);
+        return tagListEl;
     }
 
-    const renderListOfTasks = () => {
-        
+    const renderListOfTasks = (tasks) => {
+        const taskElements = [];
+        const taskHandlerList = document.querySelector('.task-handler__list');
+        tasks.forEach((task) => {
+            const props = {
+                title: task._title,
+                desc: task._desc,
+                checklist: task._checklist,
+                dueDate: task._dueDate,
+                completed: task._completed,
+                tags: task._tags
+            }
+            const taskBar = Main.createTask(props);
+            taskElements.push(taskBar);
+        });
+        appendChildren(taskHandlerList, taskElements);
+        return taskHandlerList;
     }
 
     const renderListOfChecklists = () => {
@@ -158,24 +173,14 @@ const DOMController = (() => {
         el.focus = true;
     }
 
-    const setObjProp = () => {
-
+    const removeFolderList = () => {
+        const parentEl = document.querySelector('.folder__list');
+        DOMController.removeAllChildNodes(parentEl);
     }
-
-    const renderTask = () => {
-
-    }
-
-    const addChecklist = () => {
-
-    }
-
-    const renderFolderTabs = () => {
-
-    }
-
-    const renderTasks = () => {
-
+    
+    const removeListOfTasks = () => {
+        const parentEl = document.querySelector('.task-handler__list');
+        DOMController.removeAllChildNodes(parentEl);
     }
 
     const manuallyToggleTaskHandler = (hide) => {
@@ -199,10 +204,13 @@ const DOMController = (() => {
         getProjectNote,
         getSelectedFolder,
         hideTaskForm,
+        renderListOfTasks,
         renderProjects,
         renderTags,
         removeAllChildNodes,
         removeActiveChildNodes,
+        removeFolderList,
+        removeListOfTasks,
         showAddTodoTexts,
         showEditTodoTexts,
         showTaskForm,

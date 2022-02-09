@@ -350,6 +350,10 @@ img, button, a, select, .task-bar {
     background-color: var(--color-thunderbird);
 }
 
+.checklist-control {
+    background-color: var(--color-flamingo);
+}
+
 .task__due-date {
     display: flex;
     align-items: center;
@@ -415,6 +419,43 @@ img, button, a, select, .task-bar {
     margin: 5px 0;
 }
 
+.task-tags-wrapper{
+    height: max-content;
+}
+.ck-btn {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+}
+
+.ck-btn :hover {
+    background-color:var(--color-flamingo);
+    color: #fff;
+}
+
+.ck-btn  label {
+    float:left;
+    width: fit-content;
+}
+
+.ck-btn  label span {
+    text-align:center;
+    padding:5px 14px;
+    display:block;
+}
+
+.ck-btn  label input {
+    position:absolute;
+    top:-20px;
+}
+
+.ck-btn  input:checked + span {
+    background:var(--color-thunderbird);
+    color:#fff;
+}
 /*** FOOTER ***/
 .footer {
     position: absolute;

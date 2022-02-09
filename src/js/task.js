@@ -2,17 +2,18 @@ import { uniqueID } from '../helpers';
 import { Checklist } from './checklist';
 
 export class Task {
-    constructor(title, desc, checklist, dueDate) {
+    constructor(title, desc = '', checklist = [], dueDate = '', tags = []) {
         this._id = uniqueID();
         this._title = title;
         this._desc = desc;
         this._checklist = checklist;
         this._dueDate = dueDate;
+        this._tags = tags;
         this._completed = false;
     }
     setValue(val, newVal) {
         if (isEmpty) return;
-        if(val instanceof Checklist){
+        if(typeof val === 'array'){
             val.push(newVal);
         } else {
             val = newVal;
@@ -36,6 +37,9 @@ export class Task {
     get dueDate() {
         return this._dueDate;
     }
+    get tags() {
+        return this._tags;
+    }
     set desc(desc) {
         setValue(this._desc, desc);
         return this;
@@ -54,6 +58,10 @@ export class Task {
     }
     set completed(completed) {
         setValue(this._completed, completed);
+        return this;
+    }
+    set tags(tag) {
+        setValue(this._tags, tag);
         return this;
     }
 }
