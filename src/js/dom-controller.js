@@ -1,4 +1,4 @@
-import { Sidebar, Modal, Main } from './dom-collections';
+import { Sidebar, TaskForm, TaskHandler } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
@@ -101,7 +101,7 @@ const DOMController = (() => {
                 completed: task._completed,
                 tags: task._tags
             }
-            const taskBar = Main.createTask(props);
+            const taskBar = TaskHandler.createTask(props);
             taskElements.push(taskBar);
         });
         appendChildren(taskHandlerList, taskElements);
@@ -115,7 +115,7 @@ const DOMController = (() => {
     const showTaskForm = () => {
         const modal = document.querySelector('.modal-overlay');
         modal.classList.remove('hide');
-        const taskForm = Modal.createModalTask();
+        const taskForm = TaskForm.createModalTask();
         modal.append(taskForm);
     }
 

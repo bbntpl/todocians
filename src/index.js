@@ -9,9 +9,9 @@ import('./js/dom-collections')
             domCollections.Sidebar.initialize(),
             domCollections.Ribbon.initialize(),
             domCollections.Header.initialize(),
-            domCollections.Main.initialize(),
+            domCollections.TaskHandler.initialize(),
             domCollections.Footer.initialize(),
-            domCollections.Modal.initialize()
+            domCollections.TaskForm.initialize()
         ];
         appendChildren(document.body, layoutEls);
         initialMount();
