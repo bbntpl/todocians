@@ -7,10 +7,11 @@ import {
 
 import {
     showTaskFormIfProjectIsActive,
-    toggleTaskCheckbox,
 } from '../controller';
 import Todo from '../todo';
+import DOMController from '../dom-controller';
 import calendarMonth from '../../assets/icons/calendar-month.svg';
+import chevronDown from '../../assets/icons/chevron-down.svg';
 
 const TaskHandler = (() => {
     const _filterSelectors = () => {
@@ -19,8 +20,8 @@ const TaskHandler = (() => {
             id: 'task-filter-btn'
         });
         const optionScheduled = createCustomElement('option', 'task-filter-options', {
-            text: 'Scheduled',
-            value: 'scheduled'
+            text: 'All tasks',
+            value: 'all'
         })
         const optionToday = createCustomElement('option', 'task-filter-options', {
             text: 'Today',
@@ -35,8 +36,8 @@ const TaskHandler = (() => {
             value: 'month'
         })
         const optionCompleted = createCustomElement('option', 'task-filter-options', {
-            text: 'Completed',
-            value: 'completed'
+            text: 'Active',
+            value: 'active'
         })
 
         const taskOptions = [
@@ -67,17 +68,16 @@ const TaskHandler = (() => {
 
     const createTask = (i, props) => {
         const { id, title, desc, checklist, dueDate, completed, tags } = props;
-
         const taskWrapper = createEl('div', 'task-wrapper');
         const taskBar = createEl('div', 'task-bar');
         const taskControl = createEl('div', 'task-control');
-        const taskControlInput = createCustomElement('input', `task-control-input${i+1}`, {
+        const taskControlInput = createCustomElement('input', `task-control-input${i + 1}`, {
             type: 'checkbox',
-            id: `task-checkbox${i+1}`,
+            id: `task-checkbox${i + 1}`,
             checked: completed
         });
         const taskControlLabel = createCustomElement('label', 'task-control-label');
-        taskControlLabel.setAttribute('for', `task-checkbox${i+1}`);
+        taskControlLabel.setAttribute('for', `task-checkbox${i + 1}`);
 
         const taskInner = createEl('div', 'task-inner');
         const taskDetails = createEl('div', 'task__details');
@@ -93,15 +93,11 @@ const TaskHandler = (() => {
         const taskTags = createEl('div', 'task__tags');
 
         const taskExtraDetails = createEl('div', 'task__details--extra');
-        const taskTotalChecklist = createEl('div', 'task__total-checklist');
 
-        const taskChecklistToggler = createEl('div', 'task-checklist-toggler', 'V');
-        const taskChecklistInput = createCustomElement('input', 'task-checklist-input${i+1}', {
-            type: 'checkbox'
-        });
-        const taskChecklistLabel = createEl('label', 'task-checklist-label')
+        const taskChecklistToggler = createEl('div', 'task-checklist-toggler');
+        const taskChecklistToggleIndicator = createImg('img', 'task-checklist-indicator', chevronDown);
 
-        const checklistWrapper = createEl('div', 'checklist-wrapper');
+        const checklistWrapper = createEl('div', [`checklist-wrapper${i+1}`, 'hide']);
 
 
         appendChildren(taskWrapper, [taskBar, checklistWrapper]);
@@ -112,8 +108,8 @@ const TaskHandler = (() => {
         appendChildren(taskDueDate, [dueDateIconWrapper, dueDateEl]);
         dueDateIconWrapper.append(dueDateIcon);
         appendChildren(taskDetails, [taskInstruction, taskTags]);
-        appendChildren(taskExtraDetails, [taskDueDate, taskTotalChecklist, taskChecklistToggler]);
-        appendChildren(taskChecklistToggler, [taskChecklistInput, taskChecklistLabel]);
+        appendChildren(taskExtraDetails, [taskDueDate, taskChecklistToggler]);
+        taskChecklistToggler.append(taskChecklistToggleIndicator);
 
         if (tags.length) {
             tags.forEach((item) => {
@@ -123,9 +119,13 @@ const TaskHandler = (() => {
         }
 
         if (checklist.length) {
-            checklist.forEach((c) => {
-                const props = { completed: c.completed, desc: c.desc }
-                const checklist = checklistBar(props);
+            checklist.forEach((c, i) => {
+                const props = { 
+                    completed: c._completed, 
+                    desc: c._desc,
+                    id: c._id
+                }
+                const checklist = checklistBar(id, props, i+1);
                 checklistWrapper.append(checklist);
             })
         }
@@ -135,28 +135,39 @@ const TaskHandler = (() => {
         });
 
         taskInner.addEventListener('click', () => {
-            console.log(props);
             showTaskFormIfProjectIsActive(props);
         });
 
+        taskChecklistToggleIndicator.addEventListener('click', (e) => {
+            e.stopPropagation();
+            DOMController.toggleTaskChecklist(e, i+1);
+        })
+
         return taskWrapper;
     }
-    const checklistBar = (props) => {
-        const { completed, desc } = props;
-        const taskTag = createEl('div', 'checklist-bar');
+    const checklistBar = (taskId, props, index) => {
+        const { completed, desc, id } = props;
         const checklistBar = createEl('div', 'checklist-bar');
         const checklistControl = createEl('div', 'checklist-control');
         const checklistInput = createCustomElement('input', 'checklist-control-input', {
+            id: `checklist-box${id}.${index}`,
             type: 'checkbox',
-            value: completed
+            checked: completed
         })
-        const checklistTitleWrapper = createEl('div', 'task-inner');
+        const taskControlLabel = createCustomElement('label', 'checklist-control-label');
+        taskControlLabel.setAttribute('for', `checklist-box${id}.${index}`);
+        const checklistTitleWrapper = createEl('section', 'task__instruction');
         const checklistTitle = createEl('p', 'task__title', desc);
 
         appendChildren(checklistBar, [checklistControl, checklistTitleWrapper]);
-        checklistControl.append(checklistInput);
+        appendChildren(checklistControl, [checklistInput, taskControlLabel]);
         checklistTitleWrapper.append(checklistTitle);
-        return taskTag;
+
+        checklistInput.addEventListener('click', (e) => {
+            const ids = { taskId: taskId, checklistId: id };
+            Todo.toggleChecklistCompletion(e.target.checked, ids);
+        })
+        return checklistBar;
     }
     const createTaskTag = (tag) => createEl('div', 'task-tag', tag);
     const initialize = () => {

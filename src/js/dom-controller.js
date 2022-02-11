@@ -2,6 +2,8 @@ import { Sidebar, TaskForm, TaskHandler } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
+import chevronUp from '../assets/icons/chevron-up.svg';
+import chevronDown from '../assets/icons/chevron-down.svg';
 import { appendChildren } from '../helpers';
 
 //These functions changes the properties, attrivutes of elements
@@ -27,24 +29,24 @@ const DOMController = (() => {
         document.documentElement.style.setProperty('--sidebar-width', '0px');
     }
 
-    const removeActiveChildNodes = (e) => {
-        const mainClassName = e.target.className.split(' ');
-        const siblings = document.querySelectorAll(`.${mainClassName[0]}`);
-        siblings.forEach(el => el.classList.remove('active'));
-        e.target.classList.add('active')
+    const _showChecklist = (e, id) => {
+        e.target.src = chevronUp;
+        const checklist = document.querySelector(`.checklist-wrapper${id}`);
+        checklist.classList.remove('hide');
     }
-
-    const toggleActive = (e) => {
-        e.target.classList.toggle('active');
+    const _hideChecklist = (e, id) => {
+        e.target.src = chevronDown;
+        const checklist = document.querySelector(`.checklist-wrapper${id}`);
+        checklist.classList.add('hide');
     }
-    const addActiveClassName = (el) => {
-        el.classList.add('active');
+    
+    const toggleTaskChecklist = (e, id) => {
+        if (e.target.src === chevronUp) {
+            _hideChecklist(e, id);
+        } else {
+            _showChecklist(e, id);
+        }
     }
-    const emptyInput = (e) => {
-        e.target.value = '';
-        e.target.focus = true;
-    }
-
     const _changeTextsOfFolder = (note, placeholder) => {
         const folderNote = document.querySelector('.folder__note');
         folderNote.textContent = note;
@@ -62,6 +64,24 @@ const DOMController = (() => {
             _selectedFolder = 'tag';
             _changeTextsOfFolder(_tagNote, 'Add Tag')
         }
+    }
+
+    const removeActiveChildNodes = (e) => {
+        const mainClassName = e.target.className.split(' ');
+        const siblings = document.querySelectorAll(`.${mainClassName[0]}`);
+        siblings.forEach(el => el.classList.remove('active'));
+        e.target.classList.add('active')
+    }
+
+    const toggleActive = (e) => {
+        e.target.classList.toggle('active');
+    }
+    const addActiveClassName = (el) => {
+        el.classList.add('active');
+    }
+    const emptyInput = (e) => {
+        e.target.value = '';
+        e.target.focus = true;
     }
 
     const renderProjects = (projects) => {
@@ -194,6 +214,7 @@ const DOMController = (() => {
         showTaskForm,
         switchFolder,
         toggleActive,
+        toggleTaskChecklist,
         toggleEditInput,
         toggleSidebar,
         unhideElementByClassName

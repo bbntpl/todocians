@@ -48,13 +48,14 @@ body {
     grid-template-areas: "ribbon sidebar header"
         "ribbon sidebar main"
         "ribbon sidebar footer";
+        overflow: hidden;
 }
 
 .searchbar:focus-within {
     outline: 2px solid var(--color-flamingo);
 }
 
-img, button, a, select, .task-bar {
+img, button, a, select, .task-inner {
     cursor: pointer;
 }
 
@@ -281,7 +282,7 @@ img, button, a, select, .task-bar {
     height: var(--header-height);
     width: calc(100vw - var(--main-width));
     background-color: var(--color-flamingo);
-    font-size: 52px;
+    font-size: clamp(2rem, 3.5vw, 3.8rem);
     grid-area: header;
     z-index: 50;
     color: #fff;
@@ -320,6 +321,7 @@ img, button, a, select, .task-bar {
 .task-handler__options>select {
     background: var(--color-flamingo);
     color: #fff;
+    margin: 5px 0;
 }
 
 .task-handler__options>* {
@@ -355,12 +357,15 @@ img, button, a, select, .task-bar {
     background-color: var(--color-flamingo);
 }
 
-.task-control {
+.task-control, .checklist-control {
     display: flex;
     justify-content: center;
     position: relative;
 }
-
+.task-handler__list{
+    overflow-y: auto;
+    max-height: 75vh;
+}
 .task-handler__list label {
     background-color: #fff;
     border-radius: 50%;
@@ -408,21 +413,25 @@ img, button, a, select, .task-bar {
 
 .task-bar {
     height: 100%;
-    border: 2px solid #fff;
 }
 
-.task-bar:hover {
-    border: 2px solid var(--color-thunderbird);
+.task-inner:hover {
+    border-right: 2px solid var(--color-thunderbird);
+    border-top: 2px solid var(--color-thunderbird);
+    border-bottom: 2px solid var(--color-thunderbird);
 }
 
 .task-wrapper {
-    margin: 5px 0;
+    margin: 8px 0;
 }
 
 .task-inner {
     display: flex;
     align-items: flex-start;
     width: 100%;
+    border-right: 2px solid #fff;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
 }
 
 .task__details {
@@ -431,8 +440,10 @@ img, button, a, select, .task-bar {
 
 .task__details--extra{
     display: flex; 
-    align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: center;
+    gap: 10px;
 }
 
 .task__title {
@@ -461,12 +472,24 @@ img, button, a, select, .task-bar {
 .task__due-date {
     display: flex;
     flex-direction: column;
-
     align-items: center;
 }
 
 .due-date-icon{
     filter: var(--filtered-cape-cod);
+}
+
+.task-checklist-toggler{
+    border: 0;
+    background-color: var(--color-flamingo);
+    width: 22px;
+    height: 22px;
+}
+
+.task-checklist-indicator{
+    filter: var(--filtered-athens-gray);
+    width: inherit;
+    height: inherit;
 }
 
 .task-tags-wrapper {
@@ -477,7 +500,6 @@ img, button, a, select, .task-bar {
     margin: 15px 0 5px 0;
     display: flex;
     flex-wrap: wrap;
-    /* grid-template-columns: repeat(auto-fit, minmax(40px, 200px)); */
     gap: 5px;
 }
 
@@ -491,40 +513,6 @@ img, button, a, select, .task-bar {
     border-radius: var(--primary-border-radius);
 }
 
-.ck-btn {
-    margin: 4px;
-    background-color: #EFEFEF;
-    border-radius: 4px;
-    border: 1px solid #D0D0D0;
-    overflow: auto;
-    float: left;
-}
-
-.ck-btn :hover {
-    background-color: var(--color-flamingo);
-    color: #fff;
-}
-
-.ck-btn label {
-    float: left;
-    width: fit-content;
-}
-
-.ck-btn label span {
-    text-align: center;
-    padding: 5px 14px;
-    display: block;
-}
-
-.ck-btn label input {
-    position: absolute;
-    top: -20px;
-}
-
-.ck-btn input:checked+span {
-    background: var(--color-thunderbird);
-    color: #fff;
-}
 
 /*** FOOTER ***/
 .footer {
@@ -708,8 +696,43 @@ img, button, a, select, .task-bar {
     background: var(--color-flamingo);
     padding: 10px 0;
     font-size: clamp(1.2rem, 1vw, 2.4rem);
+    color: #fff;
 }
 
+.ck-btn {
+    margin: 4px;
+    background-color: #EFEFEF;
+    border-radius: 4px;
+    border: 1px solid #D0D0D0;
+    overflow: auto;
+    float: left;
+}
+
+.ck-btn :hover {
+    background-color: var(--color-flamingo);
+    color: #fff;
+}
+
+.ck-btn label {
+    float: left;
+    width: fit-content;
+}
+
+.ck-btn label span {
+    text-align: center;
+    padding: 5px 14px;
+    display: block;
+}
+
+.ck-btn label input {
+    position: absolute;
+    top: -20px;
+}
+
+.ck-btn input:checked+span {
+    background: var(--color-thunderbird);
+    color: #fff;
+}
 
 
 /*** SWEET ALERT ***/
@@ -752,6 +775,9 @@ img, button, a, select, .task-bar {
 
 /***** MEDIA QUERIES *****/
 @media screen and (max-width: 950px) {
+    body{
+        font-size: 13px;
+    }
     .sidebar {
         position: absolute;
         left: var(--ribbon-width);
@@ -761,10 +787,26 @@ img, button, a, select, .task-bar {
         width: min(calc(100vw - var(--ribbon-width)));
 
     }
+    .project__title--large{
+        padding-left: 10px;
+    }
+    .main > *{
+        margin: 0;
+        padding: 10px;
+    }
 }
 
 @media screen and (max-width: 500px) {
     .modal__task {
         width: calc(100% - 20px);
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .logo {
+        display: none;
+    }
+    .sidebar__inner{
+        margin-top: 14px;
     }
 }

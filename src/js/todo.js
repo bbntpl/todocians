@@ -57,6 +57,13 @@ const Todo = (() => {
         updateLocalStorage('tags', _data.tags);
     }
 
+    const deleteTask = (taskId) => {
+        const prjIndex = getFilteredPrjIndex(getProjectId());
+        const taskIndex = getFilteredTaskIndex(taskId);
+        _data.projects[prjIndex]._tasks.splice(taskIndex, 1);
+        updateLocalStorage('projects', _data.projects);
+    }
+
     const findIndexOfObj = (arr, prop, val) => {
         return arr.findIndex(v => v[prop] === val);
     }
@@ -70,12 +77,11 @@ const Todo = (() => {
         const projects = [..._data.projects];
         if (!filterName) return projects;
         if (filterName.includes('__az')) {
-            console.log(sortByAscending(projects));
             return sortByAscending(projects);
         } else if (filterName.includes('__size')) {
-            return sortByNumOfTasks(projects);
+            return sortPrjsBySize(projects);
         } else if (filterName.includes('__inactive')) {
-            return sortPrjsBySize();
+            return sortPrjsByInactivity();
         } else {
             return projects;
         }
@@ -97,16 +103,26 @@ const Todo = (() => {
         }
     }
 
+    const getFilteredTasks = () => {
+        const tags = [..._data.tags];
+        if (!filterName) return tags;
+        if (filterName.includes('__az')) {
+            return sortByAscending(tags);
+        } else if (filterName.includes('__size')) {
+            return tags.sort((a, b) => {
+                return a._tasks.length > b._tasks.length ? 1 : -1;
+            })
+        } else if (filterName.includes('__inactive')) {
+            return tags;
+        } else {
+            return tags;
+        }
+    }
+
     const sortByAscending = (arr) => {
         return arr.sort((a, b) => {
             return a._name.toLowerCase() > b._name.toLowerCase() ? 1 : -1;
         });
-    }
-
-    const sortByNumOfTasks = (arr) => {
-        return arr.sort((a, b) => {
-            return a._tasks.length < b._tasks.length ? 1 : -1;
-        })
     }
 
     const sortPrjsBySize = () => {
@@ -114,8 +130,8 @@ const Todo = (() => {
             return a._tasks.length < b._tasks.length ? 1 : -1;
         });
     }
-    const sortPrjByInactivity = () => {
-        return [..._data.projects].filter()
+    const sortPrjsByInactivity = () => {
+        return [..._data.projects].filter(prj => prj._tasks.length && prj._tasks.every(task => task._completed));
     }
     const sortTagsBySize = () => {
 
@@ -135,25 +151,23 @@ const Todo = (() => {
         updateLocalStorage('projects', _data.projects);
     }
 
+    const sumContainedTagOnTasks = (tagId) => {
+        return []
+    }
+
     const setTask = (id, props) => {
         const { title, desc, checklist, dueDate, tags } = props;
-        console.log(props);
-        const { name, completed } = setChecklist(checklist);
+        const newChecklist = setChecklist(checklist);
         const prjIndex = findIndexOfObj(_data.projects, '_id', id);
         const currentProjectTasks = _data.projects[prjIndex]._tasks;
-        const newChecklist = new Checklist(name, completed);
         const newTask = new Task(title, desc, newChecklist, dueDate, tags);
         currentProjectTasks.push(newTask);
-
         updateLocalStorage('projects', _data.projects);
     }
 
     const setChecklist = (checklist) => {
         return checklist.reduce((arr, obj) => {
-            const checklistItem = {
-                name: obj.desc,
-                completed: obj.completed
-            }
+            const checklistItem = new Checklist(obj.desc, obj.completed);
             arr.push(checklistItem);
             return arr;
         }, [])
@@ -164,14 +178,17 @@ const Todo = (() => {
         const prjId = getProjectId();
         const { prjIndex, taskIndex }
             = getFilteredPrjAndTaskIndexes({ prjId, taskId });
-        console.log(prjIndex, taskIndex);
+
         //update the task with the new received inputs
         _data.projects[prjIndex]._tasks[taskIndex]._title = title;
         _data.projects[prjIndex]._tasks[taskIndex]._desc = desc;
-        _data.projects[prjIndex]._tasks[taskIndex]._checklist = checklist;
         _data.projects[prjIndex]._tasks[taskIndex]._dueDate = dueDate;
         _data.projects[prjIndex]._tasks[taskIndex]._tags = tags;
-
+        const cList = _data.projects[prjIndex]._tasks[taskIndex]._checklist;
+        cList.map((c) =>{
+            c.desc = checklist.desc;
+            c.completed = checklist.completed;
+        })
         updateLocalStorage('projects', _data.projects);
     }
 
@@ -182,13 +199,28 @@ const Todo = (() => {
         updateLocalStorage('projects', _data.projects);
     }
 
+    const toggleChecklistCompletion = (toggleBox, ids) => {
+        const prjIndex = getFilteredPrjIndex(getProjectId());
+        const taskIndex = getFilteredTaskIndex(ids.taskId);
+        const checklistIndex = getFilteredChecklistIndex(ids);
+        _data.projects[prjIndex]._tasks[taskIndex]._checklist[checklistIndex]._completed = toggleBox;
+        updateLocalStorage('projects', _data.projects);
+    }
+
     const getFilteredPrjIndex = (prjId) => {
         return findIndexOfObj(_data.projects, '_id', prjId);
     }
-
+    
     const getFilteredTaskIndex = (taskId) => {
         const prjIndex = getFilteredPrjIndex(getProjectId());
         return findIndexOfObj(_data.projects[prjIndex]._tasks, '_id', taskId);
+    }
+
+    const getFilteredChecklistIndex = ({taskId, checklistId}) => {
+        const prjIndex = getFilteredPrjIndex(getProjectId());
+        const tskIndex = getFilteredTaskIndex(taskId);
+        const checklistPath = _data.projects[prjIndex]._tasks[tskIndex]._checklist;
+        return findIndexOfObj(checklistPath, '_id', checklistId);
     }
 
     const getFilteredPrjAndTaskIndexes = (ids) => {
@@ -259,6 +291,7 @@ const Todo = (() => {
         deleteData,
         deleteProject,
         deleteTag,
+        deleteTask,
         deselectTag,
         editTask,
         findIndexOfObj,
@@ -280,9 +313,9 @@ const Todo = (() => {
         setTaskFilter,
         showAddTodoTexts,
         showEditTodoTexts,
-        toggleTaskCompletion
+        toggleTaskCompletion,
+        toggleChecklistCompletion
     };
 })();
-
 
 export default Todo;

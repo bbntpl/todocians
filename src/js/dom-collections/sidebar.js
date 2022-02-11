@@ -28,17 +28,6 @@ import trashIcon from '../../assets/icons/trash.svg';
 
 const Sidebar = (() => {
     const _createLogo = () => createImg('img', 'logo', logoImg);
-    const _createSearchbar = () => {
-        const searchbarEl = createEl('div', 'searchbar');
-        const magnifyIconEl = createImg('img', 'searchbar-icon', magnifyIcon);
-        const searchbarInput = createEl('input', 'searchbar-input');
-
-        searchbarInput.id = 'prj-search';
-
-        appendChildren(searchbarEl, [magnifyIconEl, searchbarInput]);
-
-        return searchbarEl;
-    }
     const _createFilters = () => {
         const organizerFilters = createEl('div', 'organizer__filter');
         //filter btns
@@ -55,7 +44,7 @@ const Sidebar = (() => {
             id: 'folder-filter__size'
         });
         const filterFinished = createCustomElement('div', 'filter', {
-            textContent: 'Inactive',
+            textContent: 'Completed',
             id: 'folder-filter__inactive'
         });
 
@@ -156,7 +145,7 @@ const Sidebar = (() => {
         const organizerEl = createEl('div', 'organizer');
 
         appendChildren(sidebarEl, [_createLogo(), sidebarInnerEl]);
-        appendChildren(sidebarInnerEl, [_createSearchbar(), _createFilters(), organizerEl]);
+        appendChildren(sidebarInnerEl, [_createFilters(), organizerEl]);
         appendChildren(organizerEl, [_createFolder()]);
 
         return sidebarEl;

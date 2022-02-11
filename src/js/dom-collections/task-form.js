@@ -10,21 +10,23 @@ import {
     addTaskToSelectedPrj,
     updateTaskHandlerView,
     matchLinkedTagsToTask,
-    editTaskToSelectedPrj
+    editTaskToSelectedPrj,
+    removeTask,
+    customAlert
 } from '../controller';
 import Todo from '../todo';
 import DOMController from '../dom-controller';
 
 import trashIcon from '../../assets/icons/trash.svg';
+import { Task } from '../task';
 
 const TaskForm = (() => {
     const _createTitleInput = (title) => {
         const lblTitle = createEl('label', 'form__label', 'Title: ');
         const inputTitle = createCustomElement('input', 'form__input', {
             id: 'task-input-title',
-            value: title
+            value: title,
         });
-        inputTitle.setAttribute('required', true);
         lblTitle.append(inputTitle);
         return lblTitle;
     }
@@ -58,34 +60,35 @@ const TaskForm = (() => {
         }
 
         inputChecklist.addEventListener('keypress', e => {
-            if (e.key === 'Enter' && e.target.value) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if(!e.target.value) return false;
                 const checklistObj = {
-                    completed: false,
-                    desc: e.target.value
+                    _completed: false,
+                    _desc: e.target.value
                 }
                 checklistList.append(createChecklistItem(checklistObj));
                 e.target.value = '';
-                return false;
             }
         });
         return lblChecklist;
     }
 
     const createChecklistItem = (checklist) => {
-        const { completed, desc } = checklist;
         const checklistItem = createEl('li', 'task-checklist-item');
         const minitaskCheckbox = createCustomElement('input', 'task-checklist-completed', {
             type: 'checkbox',
-            value: completed
+            checked: checklist._completed
         })
         const minitaskName = createCustomElement('input', 'task-checklist-name', {
-            value: desc
+            value: checklist._desc
         });
         const minitaskDeleteBtn = createImg('img', 'checklist-delete-btn', trashIcon);
 
         minitaskDeleteBtn.addEventListener('click', e => {
-            e.parentElement.remove();
+            e.target.parentElement.remove();
         })
+
         appendChildren(checklistItem, [minitaskCheckbox, minitaskName, minitaskDeleteBtn]);
 
         return checklistItem;
@@ -141,7 +144,7 @@ const TaskForm = (() => {
 
         const modalDialogHeader = createEl('div', 'modal-dialog__header');
         const modalTaskLabel = createCustomElement('legend', 'modal__task-label', {
-            textContent: props.legend || 'Add todo'
+            textContent: `${props.title ? 'Edit' : 'Add'} todo`
         });
         const modalDialogResponse = createEl('div', 'modal-dialog__response');
         const saveBtn = createCustomElement('button', 'response-btn', {
@@ -153,7 +156,7 @@ const TaskForm = (() => {
         const fieldsetPrimaryDetails = createEl('fieldset', 'modal-dialog__inputs');
         const fieldsetSecondaryDetails = createEl('fieldset', 'modal-dialog__inputs');
 
-        const deleteBtnClassNames = props.length
+        const deleteBtnClassNames = props.title
             ? ['delete-task-btn']
             : ['delete-task-btn', 'hide'];
 
@@ -181,20 +184,34 @@ const TaskForm = (() => {
 
         saveBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log(props.id);
-            if (props.id) {
-                editTaskToSelectedPrj(props.id);
-            } else {
-                addTaskToSelectedPrj();
+            if(!document.getElementById('task-input-title').value){
+                return alert('Please enter a title');
             }
+
+            //display add todo if task id is not received
+            //otherwise display edit todo
+            props.id ? editTaskToSelectedPrj(props.id) : addTaskToSelectedPrj();
             updateTaskHandlerView();
         })
+
         cancelBtn.addEventListener('click', (e) => {
             e.preventDefault();
             DOMController.hideTaskForm();
         });
+
+        deleteTaskBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const alertArgs = {
+                action: 'delete',
+                item: `"${props.title}"`,
+                id: props.id
+            }
+            customAlert(alertArgs, removeTask);
+        })
+
         return modalTask;
     }
+
     const initialize = () => {
         const modalEl = createEl('div', ['modal-overlay', 'hide']);
 

@@ -8,39 +8,61 @@ export const addFolderTab = (tabName) => {
     selectedFolder == 'prj' ? Todo.addProject(tabName) : Todo.addTag(tabName);
 }
 
+//delete all of the projects and tags including local storage items
 export const deleteDatabase = () => {
     Todo.deleteData();
     DOMController.removeFolderList();
-    DOMController.displayCurrentProject('');
+    hideProjectTasksView();
 }
 
 export const displayProjects = (filterName = null) => {
     DOMController.removeFolderList();
     const projects = Todo.getFilteredProjects(filterName);
-    DOMController.renderProjects(projects);
+    if(projects.length){
+        DOMController.renderProjects(projects);
+    } else {
+        hideProjectTasksView();
+    }
 }
 
 export const displayTags = (filterName = null) => {
     DOMController.removeFolderList();
     const tags = Todo.getFilteredTags(filterName);
-    DOMController.renderTags(tags);
+    if(tags.length){
+        DOMController.renderTags(tags);
+    } else {
+        hideProjectTasksView();
+    }
 }
 
-export const displayTasks = () => {
+export const displayTasksByProject = () => {
     DOMController.removeListOfTasks();
     const tasks = Todo.getTasks();
     DOMController.renderListOfTasks(tasks);
 }
 
-export const displayAllTasks = () => {
-    removeListOfTasks();
+export const displayTasksByTags = () => {
+    DOMController.removeListOfTasks();
     const allTasks = Todo.getAllTasks();
     DOMController.renderListOfTasks(allTasks);
+}
+
+export const displayTasks = () => {
+    const selectedFolder = DOMController.getSelectedFolder();
+    const projectId = Todo.getProjectId();
+    if(selectedFolder === 'prj' && projectId) {
+        DOMController.unhideElementByClassName('task-handler__options');
+        displayTasksByProject();
+    } else {
+        DOMController.hideElementByClassName('task-handler__options');
+        displayTasksByTags();
+    }
 }
 
 export const switchFolder = (e) => {
     DOMController.switchFolder(e);
     updateFolderView();
+    displayTasks();
 }
 
 export const selectFolderFilter = (e) => {
@@ -53,10 +75,8 @@ export const updateFolderView = () => {
     const folderFilter = Todo.getFolderFilter();
     const selectedFolder = DOMController.getSelectedFolder();
     if (selectedFolder === 'prj') {
-        displayTasks();
         displayProjects(folderFilter);
     } else if (selectedFolder === 'tag') {
-        displayAllTasks();
         displayTags(folderFilter);
     }
 }
@@ -73,10 +93,6 @@ export const showHeaderText = () => {
     DOMController.displayCurrentProject(textHeader);
 }
 
-export const removeListOfTasks = () => {
-    const taskHandlerEl = document.querySelector('.task-handler__list');
-    DOMController.removeAllChildNodes(taskHandlerEl);
-}
 
 export const isProjectAsActive = (id) => {
     return Todo.getProjectId == id;
@@ -119,7 +135,7 @@ const toggleTasksByAvailability = () => {
         displayTasks();
         DOMController.hideElementByClassName('task-handler__empty-msg');
     } else {
-        removeListOfTasks();
+        DOMController.removeListOfTasks();
         DOMController.unhideElementByClassName('task-handler__empty-msg');
     }
 }
@@ -159,7 +175,7 @@ export const showProjectTasksView = () => {
 export const hideProjectTasksView = () => {
     Todo.setProjectId('');
     DOMController.toggleDescendantElements(false, '.main > *');
-    removeListOfTasks();
+    DOMController.removeListOfTasks();
     DOMController.displayCurrentProject('');
 }
 
@@ -169,6 +185,14 @@ export const removeActiveProjectView = (id) => {
         hideProjectTasksView();
     }
 }
+
+export const removeTask = (taskId) => {
+    Todo.deleteTask(taskId);
+    DOMController.hideTaskForm();
+    displayTasks();
+}
+
+
 
 export const selectFirstProjectTab = () => {
     const project = Todo.getFilteredProjects();
@@ -237,7 +261,9 @@ export const updateTodoView = (event) => {
 }
 
 export const showTaskFormIfProjectIsActive = (taskProps = '') => {
-    if (!Todo.getProjectId()) return
+    const projectId = Todo.getProjectId();
+    const selectedFolder = DOMController.getSelectedFolder();
+    if (!projectId || selectedFolder == 'tag') return;
     DOMController.showTaskForm(taskProps);
 }
 
@@ -264,8 +290,8 @@ export const collectInputsFromTaskForm = () => {
         title: title.value,
         desc: desc.value,
         dueDate: dueDate.value,
-        checklist,
-        tags
+        checklist: checklist,
+        tags: tags
     }
 }
 
@@ -276,10 +302,9 @@ export const collectChecklistFromTaskForm = () => {
     return Array.from(cl).reduce((arr, input, index) => {
         const checklistObj = {
             desc: input.value,
-            completed: clCbox[index].value
+            completed: clCbox[index].checked
         }
         arr.push(checklistObj);
-
         return arr;
     }, []);
 }
