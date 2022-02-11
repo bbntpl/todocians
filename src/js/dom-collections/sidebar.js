@@ -10,7 +10,7 @@ import {
     switchFilterTab,
     getInputValueOnEnter,
     selectProjectTab,
-    removeProjectTabAndView,
+    removeActiveProjectView,
     toggleTagTabSelection,
     toggleEditInput,
     editProjectTab,
@@ -116,7 +116,7 @@ const Sidebar = (() => {
             const action = 'delete';
             const item = name;
             const customAlertArgs = { action, item, id };
-            customAlert(customAlertArgs, removeProjectTabAndView);
+            customAlert(customAlertArgs, removeActiveProjectView);
         });
 
         return prjTab;

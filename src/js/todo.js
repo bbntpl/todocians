@@ -18,40 +18,6 @@ const TODO_DATA = {
         task: '',
         folder: 'scheduled'
     },
-    filteredProjects: function (filterName) {
-        const projects = [...this.projects];
-        if (!filterName) return projects;
-        if (filterName.includes('__az')) {
-            return projects.sort((a, b) => {
-                return a._name > b._name ? 1 : -1;
-            })
-        } else if (filterName.includes('__size')) {
-            return projects.sort((a, b) => {
-                return a._tasks.length > b._tasks.length ? 1 : -1;
-            })
-        } else if (filterName.includes('__inactive')) {
-            return projects;
-        } else {
-            return projects;
-        }
-    },
-    filteredTags: function (filterName) {
-        const tags = [...this.tags];
-        if (!filterName) return tags;
-        if (filterName.includes('__az')) {
-            return tags.sort((a, b) => {
-                return a._name > b._name ? 1 : -1;
-            })
-        } else if (filterName.includes('__size')) {
-            return tags.sort((a, b) => {
-                return a._tasks.length > b._tasks.length ? 1 : -1;
-            })
-        } else if (filterName.includes('__inactive')) {
-            return tags;
-        } else {
-            return tags;
-        }
-    },
     projects: getItemFromLocal('projects') || [],
     tags: getItemFromLocal('tags') || [],
 }
@@ -95,22 +61,64 @@ const Todo = (() => {
         return arr.findIndex(v => v[prop] === val);
     }
 
-    // const getObjOfArray = (args) => {
-    //     const { id, array } = args;
-    //     findIndexOfObj()
-    // }
-
     const getAllTasks = () => {
         const projects = getFilteredProjects();
-        return projects.reduce((tasks, task) => tasks.concat(task), []);
+        return projects.reduce((tasks, prj) => tasks.concat(prj._tasks), []);
     }
 
     const getFilteredProjects = (filterName) => {
-        return _data.filteredProjects(filterName);
+        const projects = [..._data.projects];
+        if (!filterName) return projects;
+        if (filterName.includes('__az')) {
+            console.log(sortByAscending(projects));
+            return sortByAscending(projects);
+        } else if (filterName.includes('__size')) {
+            return sortByNumOfTasks(projects);
+        } else if (filterName.includes('__inactive')) {
+            return sortPrjsBySize();
+        } else {
+            return projects;
+        }
     }
 
     const getFilteredTags = (filterName) => {
-        return _data.filteredTags(filterName);
+        const tags = [..._data.tags];
+        if (!filterName) return tags;
+        if (filterName.includes('__az')) {
+            return sortByAscending(tags);
+        } else if (filterName.includes('__size')) {
+            return tags.sort((a, b) => {
+                return a._tasks.length > b._tasks.length ? 1 : -1;
+            })
+        } else if (filterName.includes('__inactive')) {
+            return tags;
+        } else {
+            return tags;
+        }
+    }
+
+    const sortByAscending = (arr) => {
+        return arr.sort((a, b) => {
+            return a._name.toLowerCase() > b._name.toLowerCase() ? 1 : -1;
+        });
+    }
+
+    const sortByNumOfTasks = (arr) => {
+        return arr.sort((a, b) => {
+            return a._tasks.length < b._tasks.length ? 1 : -1;
+        })
+    }
+
+    const sortPrjsBySize = () => {
+        return [..._data.projects].sort((a, b) => {
+            return a._tasks.length < b._tasks.length ? 1 : -1;
+        });
+    }
+    const sortPrjByInactivity = () => {
+        return [..._data.projects].filter()
+    }
+    const sortTagsBySize = () => {
+
     }
 
     const getTasks = () => {
@@ -129,13 +137,14 @@ const Todo = (() => {
 
     const setTask = (id, props) => {
         const { title, desc, checklist, dueDate, tags } = props;
+        console.log(props);
         const { name, completed } = setChecklist(checklist);
         const prjIndex = findIndexOfObj(_data.projects, '_id', id);
         const currentProjectTasks = _data.projects[prjIndex]._tasks;
         const newChecklist = new Checklist(name, completed);
         const newTask = new Task(title, desc, newChecklist, dueDate, tags);
         currentProjectTasks.push(newTask);
-        
+
         updateLocalStorage('projects', _data.projects);
     }
 
@@ -146,23 +155,69 @@ const Todo = (() => {
                 completed: obj.completed
             }
             arr.push(checklistItem);
+            return arr;
         }, [])
     }
 
-    const editTask = (ids, props) => {
-        const { prjId, tskId } = ids;
-        const { title, desc, checklist, dueDate } = props;
-        const prjIndex = findIndexOfObj(_data.projects, '_id', prjId);
-        const tskIndex = findIndexOfObj(_data.projects[prjIndex], '_id', tskId);
-        
+    const editTask = (taskId, props) => {
+        const { title, desc, checklist, dueDate, tags } = props;
+        const prjId = getProjectId();
+        const { prjIndex, taskIndex }
+            = getFilteredPrjAndTaskIndexes({ prjId, taskId });
+        console.log(prjIndex, taskIndex);
         //update the task with the new received inputs
-        _data.projects[prjIndex].tasks[tskIndex]
-        .title(title)
-        .desc(desc)
-        .checklist(checklist)
-        .dueDate(dueDate)
+        _data.projects[prjIndex]._tasks[taskIndex]._title = title;
+        _data.projects[prjIndex]._tasks[taskIndex]._desc = desc;
+        _data.projects[prjIndex]._tasks[taskIndex]._checklist = checklist;
+        _data.projects[prjIndex]._tasks[taskIndex]._dueDate = dueDate;
+        _data.projects[prjIndex]._tasks[taskIndex]._tags = tags;
 
         updateLocalStorage('projects', _data.projects);
+    }
+
+    const toggleTaskCompletion = (toggleBox, taskId) => {
+        const prjIndex = getFilteredPrjIndex(getProjectId());
+        const taskIndex = getFilteredTaskIndex(taskId);
+        _data.projects[prjIndex]._tasks[taskIndex]._completed = toggleBox;
+        updateLocalStorage('projects', _data.projects);
+    }
+
+    const getFilteredPrjIndex = (prjId) => {
+        return findIndexOfObj(_data.projects, '_id', prjId);
+    }
+
+    const getFilteredTaskIndex = (taskId) => {
+        const prjIndex = getFilteredPrjIndex(getProjectId());
+        return findIndexOfObj(_data.projects[prjIndex]._tasks, '_id', taskId);
+    }
+
+    const getFilteredPrjAndTaskIndexes = (ids) => {
+        const { prjId, taskId } = ids;
+        return {
+            prjIndex: getFilteredPrjIndex(prjId),
+            taskIndex: getFilteredTaskIndex(taskId)
+        }
+    }
+
+    const showAddTodoTexts = () => {
+        return {
+            legend: 'Add todo',
+            title: '',
+            desc: '',
+            checklist: [],
+            dueDate: ''
+        }
+    }
+
+    const showEditTodoTexts = (props) => {
+        const { title, desc, checklist, dueDate } = props;
+        return {
+            legend: 'Edit todo',
+            title: title,
+            desc: desc,
+            checklist: checklist,
+            dueDate: dueDate
+        }
     }
 
     const isProjectActive = (id) => {
@@ -223,6 +278,9 @@ const Todo = (() => {
         setProjectNameById,
         setTask,
         setTaskFilter,
+        showAddTodoTexts,
+        showEditTodoTexts,
+        toggleTaskCompletion
     };
 })();
 

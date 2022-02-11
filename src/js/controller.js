@@ -29,14 +29,20 @@ export const displayTags = (filterName = null) => {
 export const displayTasks = () => {
     DOMController.removeListOfTasks();
     const tasks = Todo.getTasks();
-    console.log(tasks);
     DOMController.renderListOfTasks(tasks);
+}
+
+export const displayAllTasks = () => {
+    removeListOfTasks();
+    const allTasks = Todo.getAllTasks();
+    DOMController.renderListOfTasks(allTasks);
 }
 
 export const switchFolder = (e) => {
     DOMController.switchFolder(e);
     updateFolderView();
 }
+
 export const selectFolderFilter = (e) => {
     DOMController.removeActiveChildNodes(e);
     Todo.setFolderFilter(e.target.id);
@@ -47,31 +53,30 @@ export const updateFolderView = () => {
     const folderFilter = Todo.getFolderFilter();
     const selectedFolder = DOMController.getSelectedFolder();
     if (selectedFolder === 'prj') {
+        displayTasks();
         displayProjects(folderFilter);
     } else if (selectedFolder === 'tag') {
+        displayAllTasks();
         displayTags(folderFilter);
     }
 }
 
 export const updateTaskHandlerView = () => {
-    displayTasks();
+    toggleTasksByAvailability();
 }
 
-export const writeHeaderText = () => {
+export const showHeaderText = () => {
     const { findIndexOfObj, getFilteredProjects, getProjectId } = Todo;
     const project = getFilteredProjects();
-    const index = findIndexOfObj(project, '_id', getProjectId());
-    const textHeader = project[index]._name || '';
+    const prjIndex = findIndexOfObj(project, '_id', getProjectId());
+    const textHeader = project[prjIndex]._name || '';
     DOMController.displayCurrentProject(textHeader);
 }
 
-export const hideTaskHandler = () => {
-    Todo.setProjectId('');
-    const projectId = Todo.getProjectId();
-    if (projectId) return;
-    DOMController.manuallyToggleTaskHandler(true);
+export const removeListOfTasks = () => {
+    const taskHandlerEl = document.querySelector('.task-handler__list');
+    DOMController.removeAllChildNodes(taskHandlerEl);
 }
-
 
 export const isProjectAsActive = (id) => {
     return Todo.getProjectId == id;
@@ -84,12 +89,16 @@ export const isTagActive = (id) => {
 export const minAndMaxDates = (formatString) => {
     const minDate = new Date();
     const maxDate = new Date(864000000000000);
-
     return {
         min: format(minDate, formatString),
         max: format(maxDate, formatString)
     };
 }
+
+export const matchLinkedTagsToTask = (tag, taskTags) => {
+    return taskTags.find(taskTag => taskTag._id === tag._id);
+}
+
 //EVENT CALLBACK FUNCTIONS
 export const switchFilterTab = (event) => {
     selectFolderFilter(event);
@@ -105,13 +114,23 @@ export const getInputValueOnEnter = (event) => {
     }
 }
 
+const toggleTasksByAvailability = () => {
+    if (Todo.getTasks().length) {
+        displayTasks();
+        DOMController.hideElementByClassName('task-handler__empty-msg');
+    } else {
+        removeListOfTasks();
+        DOMController.unhideElementByClassName('task-handler__empty-msg');
+    }
+}
+
+
 export const selectProjectTab = (event, id) => {
     const className = event.target.classList;
     if (className.contains('active')) return;
     DOMController.removeActiveChildNodes(event);
     Todo.setProjectId(id);
-    writeHeaderText();
-    DOMController.manuallyToggleTaskHandler(false);
+    showProjectTasksView();
 }
 
 export const toggleTagTabSelection = (event, id) => {
@@ -131,10 +150,24 @@ export const removeFolderTab = (id) => {
     updateFolderView();
 }
 
-export const removeProjectTabAndView = (id) => {
-    removeFolderTab(id);
-    hideTaskHandler();
+export const showProjectTasksView = () => {
+    showHeaderText();
+    DOMController.toggleDescendantElements(true, '.main > *');
+    toggleTasksByAvailability();
+}
+
+export const hideProjectTasksView = () => {
+    Todo.setProjectId('');
+    DOMController.toggleDescendantElements(false, '.main > *');
+    removeListOfTasks();
     DOMController.displayCurrentProject('');
+}
+
+export const removeActiveProjectView = (id) => {
+    removeFolderTab(id);
+    if (id === Todo.getProjectId()) {
+        hideProjectTasksView();
+    }
 }
 
 export const selectFirstProjectTab = () => {
@@ -179,6 +212,7 @@ export const customAlert = (props, callback) => {
         });
 }
 
+//display custom alerts
 export const alertEmptyDatabase = () => {
     swal('The local storage is empty.', {
         buttons: {
@@ -189,7 +223,7 @@ export const alertEmptyDatabase = () => {
 }
 
 export const alertDatabaseRemovalAction = () => {
-    if(Todo.getFilteredProjects().length){
+    if (Todo.getFilteredProjects().length) {
         const customAlertArgs = { action: 'delete', item: 'the database' }
         customAlert(customAlertArgs, deleteDatabase);
     } else {
@@ -199,12 +233,12 @@ export const alertDatabaseRemovalAction = () => {
 
 export const updateTodoView = (event) => {
     DOMController.removeActiveChildNodes(event);
-    writeHeaderText();
+    showHeaderText();
 }
 
-export const showTaskFormIfProjectIsActive = () => {
+export const showTaskFormIfProjectIsActive = (taskProps = '') => {
     if (!Todo.getProjectId()) return
-    DOMController.showTaskForm();
+    DOMController.showTaskForm(taskProps);
 }
 
 export const addTaskToSelectedPrj = () => {
@@ -214,13 +248,19 @@ export const addTaskToSelectedPrj = () => {
     DOMController.hideTaskForm();
 }
 
+export const editTaskToSelectedPrj = (taskId) => {
+    const props = collectInputsFromTaskForm();
+    Todo.editTask(taskId, props);
+    DOMController.hideTaskForm();
+}
+
 export const collectInputsFromTaskForm = () => {
     const title = document.getElementById('task-input-title');
     const desc = document.getElementById('task-input-desc');
     const dueDate = document.getElementById('task-input-duedate');
     const checklist = collectChecklistFromTaskForm();
     const tags = collectTagsFromTaskForm();
-    return{
+    return {
         title: title.value,
         desc: desc.value,
         dueDate: dueDate.value,
@@ -231,44 +271,43 @@ export const collectInputsFromTaskForm = () => {
 
 export const collectChecklistFromTaskForm = () => {
     const cl = document.querySelectorAll('.task-checklist-name');
-    if(!cl.length) return [];
+    if (!cl.length) return [];
     const clCbox = document.querySelectorAll('.task-checklist-completed');
-    return cl.reduce((arr, input, index) => {
+    return Array.from(cl).reduce((arr, input, index) => {
         const checklistObj = {
             desc: input.value,
             completed: clCbox[index].value
         }
         arr.push(checklistObj);
-    },[]);
+
+        return arr;
+    }, []);
 }
 
 export const collectTagsFromTaskForm = () => {
     const tagCheckboxes = document.querySelectorAll('.ck-input');
     const tags = Todo.getTags();
     return tags.reduce((arr, tag, i) => {
-        if(tagCheckboxes[i].value) {
+        if (tagCheckboxes[i].checked) {
             arr.push(tag);
         }
-    }, [])
+        return arr;
+    }, []);
 }
 
-export const editTaskOfSelectedPrj = () => {
-
-}
-//Initial mount
-const defaultDataToBeDisplayed = () => {
-    selectFirstProjectTab();
-    writeHeaderText();
-}
-
-const defaultTaskHandlerView = () => {
-    if (!Todo.getFilteredProjects()) {
-
-    }
-}
-export const initialMount = () => {
-    if (!Todo.getFilteredProjects().length) return;
+//display projects, active project and tasks
+//if it exists
+const defaultView = () => {
     displayProjects();
-    defaultDataToBeDisplayed();
-    console.log(Todo.getFilteredProjects());
+    selectFirstProjectTab();
+    showHeaderText();
+    toggleTasksByAvailability();
+}
+
+export const initialMount = () => {
+    if (Todo.getFilteredProjects().length){
+        defaultView();
+    } else {
+        hideProjectTasksView();
+    }
 }

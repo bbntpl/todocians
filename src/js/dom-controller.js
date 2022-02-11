@@ -2,9 +2,9 @@ import { Sidebar, TaskForm, TaskHandler } from './dom-collections';
 
 import chevronRight from '../assets/icons/chevron-right.svg';
 import chevronLeft from '../assets/icons/chevron-left.svg';
-import { appendChildren  } from '../helpers';
+import { appendChildren } from '../helpers';
 
-//These functions changes the properties of elements
+//These functions changes the properties, attrivutes of elements
 //They're primarily for UI elements manipulation
 const DOMController = (() => {
     let _isSidebarCollapsed = false;
@@ -28,7 +28,6 @@ const DOMController = (() => {
     }
 
     const removeActiveChildNodes = (e) => {
-        //main classname of an element
         const mainClassName = e.target.className.split(' ');
         const siblings = document.querySelectorAll(`.${mainClassName[0]}`);
         siblings.forEach(el => el.classList.remove('active'));
@@ -92,8 +91,9 @@ const DOMController = (() => {
     const renderListOfTasks = (tasks) => {
         const taskElements = [];
         const taskHandlerList = document.querySelector('.task-handler__list');
-        tasks.forEach((task) => {
+        tasks.forEach((task, i) => {
             const props = {
+                id: task._id,
                 title: task._title,
                 desc: task._desc,
                 checklist: task._checklist,
@@ -101,21 +101,17 @@ const DOMController = (() => {
                 completed: task._completed,
                 tags: task._tags
             }
-            const taskBar = TaskHandler.createTask(props);
+            const taskBar = TaskHandler.createTask(i, props);
             taskElements.push(taskBar);
         });
         appendChildren(taskHandlerList, taskElements);
         return taskHandlerList;
     }
 
-    const renderListOfChecklists = () => {
-
-    }
-
-    const showTaskForm = () => {
+    const showTaskForm = (taskProps = '') => {
         const modal = document.querySelector('.modal-overlay');
         modal.classList.remove('hide');
-        const taskForm = TaskForm.createModalTask();
+        const taskForm = TaskForm.createModalTask(taskProps);
         modal.append(taskForm);
     }
 
@@ -123,27 +119,6 @@ const DOMController = (() => {
         const modal = document.querySelector('.modal-overlay');
         modal.removeChild(modal.firstChild);
         modal.classList.add('hide');
-    }
-
-    const showAddTodoTexts = () => {
-        return {
-            legend: 'Add todo',
-            title: '',
-            desc: '',
-            checklist: [],
-            dueDate: ''
-        }
-    }
-
-    const showEditTodoTexts = (props) => {
-        const { title, desc, checklist, dueDate } = props;
-        return {
-            legend: 'Edit todo',
-            title: title,
-            desc: desc,
-            checklist: checklist,
-            dueDate: dueDate
-        }
     }
 
     const removeAllChildNodes = (parent) => {
@@ -160,10 +135,7 @@ const DOMController = (() => {
     const addClassNameToParent = (e, className) => {
         e.currentTarget.parentElement.classList.add(className);
     }
-    const displayActionConfirmation = (action, item) => {
-        const modal = document.querySelector('.modal');
-        modal.append(Modal.createActionConfirmation(action, item));
-    }
+
     const getSelectedFolder = () => _selectedFolder;
 
     const getProjectNote = () => _projectNote;
@@ -177,32 +149,40 @@ const DOMController = (() => {
         const parentEl = document.querySelector('.folder__list');
         DOMController.removeAllChildNodes(parentEl);
     }
-    
+
     const removeListOfTasks = () => {
         const parentEl = document.querySelector('.task-handler__list');
         DOMController.removeAllChildNodes(parentEl);
     }
 
-    const manuallyToggleTaskHandler = (hide) => {
-        const taskHandlerChildren
-            = document.querySelectorAll('.main > *');
+    const hideElementByClassName = (className) => {
+        const el = document.querySelector(`.${className}`);
+        el.classList.add('hide');
+    }
 
-            taskHandlerChildren.forEach((el) => {
-            if (hide) {
-                el.classList.add('hide');
-            } else {
+    const unhideElementByClassName = className => {
+        const el = document.querySelector(`.${className}`);
+        el.classList.remove('hide');
+    }
+    const toggleDescendantElements = (isHidden, queryName) => {
+        const nodeList = document.querySelectorAll(queryName);
+        nodeList.forEach((el) => {
+            if (isHidden) {
                 el.classList.remove('hide');
+            } else {
+                el.classList.add('hide');
             }
         })
     }
     return {
         addActiveClassName,
         addClassNameToParent,
-        displayActionConfirmation,
         displayCurrentProject,
         emptyInput,
         getProjectNote,
         getSelectedFolder,
+        toggleDescendantElements,
+        hideElementByClassName,
         hideTaskForm,
         renderListOfTasks,
         renderProjects,
@@ -211,14 +191,12 @@ const DOMController = (() => {
         removeActiveChildNodes,
         removeFolderList,
         removeListOfTasks,
-        showAddTodoTexts,
-        showEditTodoTexts,
         showTaskForm,
         switchFolder,
         toggleActive,
         toggleEditInput,
         toggleSidebar,
-        manuallyToggleTaskHandler,
+        unhideElementByClassName
     }
 })();
 

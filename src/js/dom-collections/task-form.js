@@ -8,7 +8,9 @@ import {
 import {
     minAndMaxDates,
     addTaskToSelectedPrj,
-    updateTaskHandlerView
+    updateTaskHandlerView,
+    matchLinkedTagsToTask,
+    editTaskToSelectedPrj
 } from '../controller';
 import Todo from '../todo';
 import DOMController from '../dom-controller';
@@ -19,10 +21,10 @@ const TaskForm = (() => {
     const _createTitleInput = (title) => {
         const lblTitle = createEl('label', 'form__label', 'Title: ');
         const inputTitle = createCustomElement('input', 'form__input', {
-            required: true,
             id: 'task-input-title',
             value: title
         });
+        inputTitle.setAttribute('required', true);
         lblTitle.append(inputTitle);
         return lblTitle;
     }
@@ -38,30 +40,52 @@ const TaskForm = (() => {
         return lblDesc;
     }
 
-    const _createChecklist = (checklists) => {
-        const checklistArray = [];
-
+    const _createChecklist = (checklists = '') => {
         const lblChecklist = createEl('label', 'form__label', 'Checklist: ');
         const checklistWrapper = createEl('div', 'task-checklist-wrapper');
-        const inputChecklist = createEl('input', 'form__input');
+        const inputChecklist = createCustomElement('input', ['form__input', 'add-checklist-input'], {
+            placeholder: 'Add new checklist'
+        });
         const checklistList = createEl('ul', 'task-checklist');
 
         lblChecklist.append(checklistWrapper);
         appendChildren(checklistWrapper, [inputChecklist, checklistList]);
 
+        if (checklists.length) {
+            checklists.forEach((checklist) => {
+                checklistList.append(createChecklistItem(checklist));
+            });
+        }
+
+        inputChecklist.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && e.target.value) {
+                const checklistObj = {
+                    completed: false,
+                    desc: e.target.value
+                }
+                checklistList.append(createChecklistItem(checklistObj));
+                e.target.value = '';
+                return false;
+            }
+        });
         return lblChecklist;
     }
 
-    const createChecklistItem = () => {
+    const createChecklistItem = (checklist) => {
+        const { completed, desc } = checklist;
         const checklistItem = createEl('li', 'task-checklist-item');
         const minitaskCheckbox = createCustomElement('input', 'task-checklist-completed', {
             type: 'checkbox',
+            value: completed
         })
-        const minitaskName = createEl('input', 'task-checklist-name', {
-            placeholder: 'Add new checklist'
+        const minitaskName = createCustomElement('input', 'task-checklist-name', {
+            value: desc
         });
         const minitaskDeleteBtn = createImg('img', 'checklist-delete-btn', trashIcon);
 
+        minitaskDeleteBtn.addEventListener('click', e => {
+            e.parentElement.remove();
+        })
         appendChildren(checklistItem, [minitaskCheckbox, minitaskName, minitaskDeleteBtn]);
 
         return checklistItem;
@@ -73,39 +97,39 @@ const TaskForm = (() => {
             type: 'date',
             min: minAndMaxDates('yyyy-MM-dd').min,
             max: minAndMaxDates('yyyy-MM-dd').max,
-            id: 'task-input-duedate'
+            id: 'task-input-duedate',
+            value: value
         });
         lblDueDate.append(inputDueDate);
         return lblDueDate;
     }
 
-    const _createTagWrapper = (taskTag) => {
+    const _createTagWrapper = (taskTags) => {
         const lblDueDate = createEl('label', 'form__label', 'Tags: ');
         const checklistWrapper = createEl('div', 'task-tags-wrapper');
 
         lblDueDate.append(checklistWrapper);
 
         Todo.getTags().forEach((tag) => {
-            checklistWrapper.append(_createTag(tag, taskTag));
+            checklistWrapper.append(_createTag(tag, taskTags));
         })
 
         return lblDueDate;
     }
 
-    const _createTag = (tag, taskTag) => {
+    const _createTag = (tag, taskTags) => {
         const tagDiv = createEl('div', 'ck-btn');
         const tagLabel = createEl('label', 'ck-lbl');
         const tagCheckbox = createCustomElement('input', 'ck-input', {
             type: 'checkbox',
-            value: taskTag.includes(tag)
-
+            checked: matchLinkedTagsToTask(tag, taskTags)
         })
         const tagName = createEl('span', 'ck-name', tag._name);
 
         tagDiv.append(tagLabel);
         appendChildren(tagLabel, [tagCheckbox, tagName]);
 
-        return tagDiv;  
+        return tagDiv;
     }
 
     function createModalTask(props = '') {
@@ -128,7 +152,12 @@ const TaskForm = (() => {
 
         const fieldsetPrimaryDetails = createEl('fieldset', 'modal-dialog__inputs');
         const fieldsetSecondaryDetails = createEl('fieldset', 'modal-dialog__inputs');
-        const deleteTaskBtn = createEl('button', 'modal-dialog__response', 'Delete');
+
+        const deleteBtnClassNames = props.length
+            ? ['delete-task-btn']
+            : ['delete-task-btn', 'hide'];
+
+        const deleteTaskBtn = createEl('button', deleteBtnClassNames, 'Delete');
 
         const primaryInputs = [
             _createTitleInput(props.title || ''),
@@ -152,8 +181,9 @@ const TaskForm = (() => {
 
         saveBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (props.length) {
-
+            console.log(props.id);
+            if (props.id) {
+                editTaskToSelectedPrj(props.id);
             } else {
                 addTaskToSelectedPrj();
             }

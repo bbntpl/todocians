@@ -7,8 +7,9 @@ import {
 
 import {
     showTaskFormIfProjectIsActive,
+    toggleTaskCheckbox,
 } from '../controller';
-
+import Todo from '../todo';
 import calendarMonth from '../../assets/icons/calendar-month.svg';
 
 const TaskHandler = (() => {
@@ -64,20 +65,20 @@ const TaskHandler = (() => {
         return taskHandlerList;
     }
 
-    const createTask = (props) => {
-        const { title, desc, checklist, dueDate, completed, tags } = props;
+    const createTask = (i, props) => {
+        const { id, title, desc, checklist, dueDate, completed, tags } = props;
 
         const taskWrapper = createEl('div', 'task-wrapper');
         const taskBar = createEl('div', 'task-bar');
         const taskControl = createEl('div', 'task-control');
-        const taskControlInput = createCustomElement('input', 'task-control-input', {
+        const taskControlInput = createCustomElement('input', `task-control-input${i+1}`, {
             type: 'checkbox',
-            id: 'checkbox',
-            value: completed
+            id: `task-checkbox${i+1}`,
+            checked: completed
         });
-        const taskControlLabel = createCustomElement('label', 'task-control-label', {
-            for: 'checkbox',
-        })
+        const taskControlLabel = createCustomElement('label', 'task-control-label');
+        taskControlLabel.setAttribute('for', `task-checkbox${i+1}`);
+
         const taskInner = createEl('div', 'task-inner');
         const taskDetails = createEl('div', 'task__details');
         const taskInstruction = createEl('section', 'task__instruction');
@@ -93,25 +94,30 @@ const TaskHandler = (() => {
 
         const taskExtraDetails = createEl('div', 'task__details--extra');
         const taskTotalChecklist = createEl('div', 'task__total-checklist');
-        const taskChecklistToggler = createEl('div', 'task-checklist-toggler');
+
+        const taskChecklistToggler = createEl('div', 'task-checklist-toggler', 'V');
+        const taskChecklistInput = createCustomElement('input', 'task-checklist-input${i+1}', {
+            type: 'checkbox'
+        });
+        const taskChecklistLabel = createEl('label', 'task-checklist-label')
 
         const checklistWrapper = createEl('div', 'checklist-wrapper');
 
-        taskControlLabel.setAttribute('for', 'checkbox');
 
         appendChildren(taskWrapper, [taskBar, checklistWrapper]);
         appendChildren(taskBar, [taskControl, taskInner]);
         appendChildren(taskControl, [taskControlInput, taskControlLabel]);
         appendChildren(taskInner, [taskDetails, taskExtraDetails]);
-        appendChildren(taskInstruction, [taskTitle, taskDesc,]);
+        appendChildren(taskInstruction, [taskTitle, taskDesc]);
         appendChildren(taskDueDate, [dueDateIconWrapper, dueDateEl]);
         dueDateIconWrapper.append(dueDateIcon);
         appendChildren(taskDetails, [taskInstruction, taskTags]);
         appendChildren(taskExtraDetails, [taskDueDate, taskTotalChecklist, taskChecklistToggler]);
+        appendChildren(taskChecklistToggler, [taskChecklistInput, taskChecklistLabel]);
 
         if (tags.length) {
             tags.forEach((item) => {
-                const taskTag = createTaskTag(item._desc);
+                const taskTag = createTaskTag(item._name);
                 taskTags.append(taskTag);
             })
         }
@@ -123,6 +129,15 @@ const TaskHandler = (() => {
                 checklistWrapper.append(checklist);
             })
         }
+
+        taskControlInput.addEventListener('click', (e) => {
+            Todo.toggleTaskCompletion(e.target.checked, id)
+        });
+
+        taskInner.addEventListener('click', () => {
+            console.log(props);
+            showTaskFormIfProjectIsActive(props);
+        });
 
         return taskWrapper;
     }

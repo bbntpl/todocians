@@ -5,16 +5,20 @@
   "main": "webpack.config.js",
   "devDependencies": {
     "css-loader": "^6.6.0",
+    "eslint": "^8.8.0",
+    "eslint-plugin-node": "^11.1.0",
     "html-webpack-plugin": "^5.5.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.68.0",
     "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack build",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "start": "webpack serve --open"
   },
   "repository": {
     "type": "git",
