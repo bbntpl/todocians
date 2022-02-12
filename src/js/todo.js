@@ -166,11 +166,11 @@ const Todo = (() => {
                 max: 7
             },
             month: {
-                min: 30,
-                max: 60
+                min: 8,
+                max: 31
             },
             later: {
-                min: 61,
+                min: 32,
                 max: Infinity
             }
         }
@@ -272,7 +272,6 @@ const Todo = (() => {
     const modifyTaskChecklist = (checklist, prjIndex, taskIndex) => {
         //edited checklist modified by the user
         const cList = _data.projects[prjIndex]._tasks[taskIndex]._checklist;
-
         //modify the properties of the existing task checklist
         //otherwise push a new checklist obj
         checklist.map((c, i) => {

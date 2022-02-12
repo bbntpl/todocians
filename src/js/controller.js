@@ -144,7 +144,7 @@ export const getInputValueOnEnter = (event) => {
 }
 
 export const toggleTasksByAvailability = () => {
-    if (Todo.getTasks().length) {
+    if (Todo.getFilteredTasks().length) {
         displayTasks();
         DOMController.hideElementByClassName('task-handler__empty-msg');
     } else {

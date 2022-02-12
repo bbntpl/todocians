@@ -16,6 +16,13 @@ module.exports = {
             return `${filepath}/[name].[hash][ext][query]`;
         },
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            favicon: './src/assets/images/favicon.png',
+            title: 'For procrastinators...',
+            template: './src/index.html'
+        })
+    ],
     module: {
         rules: [
             {
@@ -32,11 +39,4 @@ module.exports = {
             }
         ]
     },
-    plugins: [
-        new HtmlWebpackPlugin({
-            favicon: './src/assets/images/favicon.png',
-            title: 'For procrastinators...',
-            template: './src/index.html'
-        })
-    ],
 }
