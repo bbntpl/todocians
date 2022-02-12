@@ -19,3 +19,4 @@ The design was inspired by habitica(especially the task modal).
 
 ### Screenshot
 
+![todocians__ss.png](./src/assets/images/todocians__ss.png)

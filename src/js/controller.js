@@ -72,7 +72,6 @@ const showTagsTasksView = () => {
 const selectFolderFilter = (e) => {
     DOMController.removeActiveChildNodes(e);
     Todo.setFolderFilter(e.target.id);
-    updateFolderView();
 }
 
 export const selectTaskFilter = (e) => {
@@ -278,6 +277,7 @@ export const addTaskToSelectedPrj = () => {
     const prjIndex = Todo.getProjectId();
     Todo.setTask(prjIndex, taskProps);
     DOMController.hideTaskForm();
+    displayTasks();
     updateFolderView();
 }
 

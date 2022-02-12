@@ -86,6 +86,7 @@ const TaskForm = (() => {
         const minitaskDeleteBtn = createImg('img', 'checklist-delete-btn', trashIcon);
 
         minitaskDeleteBtn.addEventListener('click', e => {
+            e.preventDefault();
             e.target.parentElement.remove();
         })
 
