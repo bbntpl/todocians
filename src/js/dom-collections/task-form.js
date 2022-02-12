@@ -201,13 +201,10 @@ const TaskForm = (() => {
 
         deleteTaskBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const selectedFolder = DOMController.getSelectedFolder();
             const alertArgs = {
                 action: 'delete',
                 item: `"${props.title}"`,
-                params: {
-                    taskId: props.id
-                }
+                id: props.id
             }
             customAlert(alertArgs, removeTask);
         })

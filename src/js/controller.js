@@ -200,8 +200,8 @@ export const removeActiveProjectView = (id) => {
     }
 }
 
-export const removeTask = (params) => {
-    Todo.deleteTask(params.taskId, DOMController.getSelectedFolder());
+export const removeTask = (id) => {
+    Todo.deleteTask(id, DOMController.getSelectedFolder());
     DOMController.hideTaskForm();
     displayTasks();
     updateFolderView();
@@ -233,7 +233,7 @@ export const editProjectTab = (event, { id, inputEl, nameEl }) => {
 }
 
 export const customAlert = (props, callback) => {
-    const { action, item, params } = props;
+    const { action, item, id } = props;
     const confirmedResponse
         = `Are you sure you want to ${action} ${item}?`;
     swal(confirmedResponse, {
@@ -244,7 +244,7 @@ export const customAlert = (props, callback) => {
     })
         .then((outcome) => {
             if (outcome) {
-                callback(params);
+                callback(id);
             }
         });
 }

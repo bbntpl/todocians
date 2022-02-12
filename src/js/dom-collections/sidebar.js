@@ -104,8 +104,7 @@ const Sidebar = (() => {
             e.stopPropagation();
             const action = 'delete';
             const item = name;
-            const params = { id: id }
-            const customAlertArgs = { action, item, params };
+            const customAlertArgs = { action, item, id };
             customAlert(customAlertArgs, removeActiveProjectView);
         });
 
@@ -133,8 +132,7 @@ const Sidebar = (() => {
             e.stopPropagation();
             const action = 'delete';
             const item = name;
-            const params = { id: id }
-            const customAlertArgs = { action, item, params };
+            const customAlertArgs = { action, item, id };
             customAlert(customAlertArgs, removeFolderTab);
         });
 
