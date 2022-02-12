@@ -20,7 +20,6 @@ import Todo from '../todo';
 import DOMController from '../dom-controller';
 
 import tagIcon from '../../assets/icons/tag.svg';
-import magnifyIcon from '../../assets/icons/magnify.svg';
 import logoImg from '../../assets/images/logo.svg';
 import editIcon from '../../assets/icons/edit.svg';
 import closeIcon from '../../assets/icons/close.svg';
@@ -44,7 +43,7 @@ const Sidebar = (() => {
             id: 'folder-filter__size'
         });
         const filterFinished = createCustomElement('div', 'filter', {
-            textContent: 'Completed',
+            textContent: 'Inactive',
             id: 'folder-filter__inactive'
         });
 
@@ -71,13 +70,14 @@ const Sidebar = (() => {
 
         return folderEl;
     }
-    const createPrjTab = ({ name, index, id }) => {
+    const createPrjTab = ({ name, index, id, totalTasks }) => {
+        const displayTotalTasks = totalTasks ? `(${totalTasks})` : '';
         const prjTabClass = Todo.isProjectActive(id)
             ? ['folder__tab', 'active'] : 'folder__tab';
 
         const prjTab = createEl('div', prjTabClass);
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', ['tab-name', 'centered'], name);
+        const tabName = createEl('p', ['tab-name', 'centered'], `${name} ${displayTotalTasks}`);
         const tabInput = createCustomElement('input', ['edit-input', 'hide'], {
             type: 'text',
             autofocus: true
@@ -104,25 +104,25 @@ const Sidebar = (() => {
             e.stopPropagation();
             const action = 'delete';
             const item = name;
-            const customAlertArgs = { action, item, id };
+            const params = { id: id }
+            const customAlertArgs = { action, item, params };
             customAlert(customAlertArgs, removeActiveProjectView);
         });
 
         return prjTab;
     }
-    const createTagTab = ({ name, index, id, numOfTags }) => {
+    const createTagTab = ({ name, id, numOfTags }) => {
+        const displayTotalTasks = numOfTags ? `(${numOfTags})` : '';
         const tagTabClass = Todo.isTagActive(id)
             ? ['folder__tab', 'active'] : 'folder__tab';
-
         const tagTab = createEl('div', tagTabClass);
         const tabTitle = createEl('div', 'tab-title');
-        const tabName = createEl('p', ['tab-name', 'centered'], name);
+        const tabName = createEl('p', ['tab-name', 'centered'], `${name} ${displayTotalTasks}`);
         const rowItemsHolder = createEl('div', 'row-items-holder');
         const tagIconEl = createImg('img', 'tab-icon', tagIcon);
-        const totalTags = createEl('div', 'total-tags', `(${numOfTags})`);
         const removeIconEl = createImg('img', 'tab-icon', closeIcon);
         appendChildren(tagTab, [tabTitle, rowItemsHolder]);
-        appendChildren(tabTitle, [tagIconEl, tabName, totalTags]);
+        appendChildren(tabTitle, [tagIconEl, tabName]);
         rowItemsHolder.append(removeIconEl);
 
         tagTab.addEventListener('click', (e) => {
@@ -133,7 +133,8 @@ const Sidebar = (() => {
             e.stopPropagation();
             const action = 'delete';
             const item = name;
-            const customAlertArgs = { action, item, id };
+            const params = { id: id }
+            const customAlertArgs = { action, item, params };
             customAlert(customAlertArgs, removeFolderTab);
         });
 

@@ -7,12 +7,12 @@ import {
 
 import {
     minAndMaxDates,
-    addTaskToSelectedPrj,
-    updateTaskHandlerView,
+    toggleTasksByAvailability,
     matchLinkedTagsToTask,
-    editTaskToSelectedPrj,
+    editTask,
     removeTask,
-    customAlert
+    customAlert,
+    addTaskToSelectedPrj
 } from '../controller';
 import Todo from '../todo';
 import DOMController from '../dom-controller';
@@ -190,8 +190,8 @@ const TaskForm = (() => {
 
             //display add todo if task id is not received
             //otherwise display edit todo
-            props.id ? editTaskToSelectedPrj(props.id) : addTaskToSelectedPrj();
-            updateTaskHandlerView();
+            props.id ? editTask(props.id) : addTaskToSelectedPrj();
+            toggleTasksByAvailability();
         })
 
         cancelBtn.addEventListener('click', (e) => {
@@ -201,10 +201,13 @@ const TaskForm = (() => {
 
         deleteTaskBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            const selectedFolder = DOMController.getSelectedFolder();
             const alertArgs = {
                 action: 'delete',
                 item: `"${props.title}"`,
-                id: props.id
+                params: {
+                    taskId: props.id
+                }
             }
             customAlert(alertArgs, removeTask);
         })

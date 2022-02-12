@@ -6,7 +6,7 @@ import {
 } from '../../helpers';
 
 import {
-    showTaskFormIfProjectIsActive,
+    selectTaskFilter
 } from '../controller';
 import Todo from '../todo';
 import DOMController from '../dom-controller';
@@ -35,20 +35,28 @@ const TaskHandler = (() => {
             text: 'This month',
             value: 'month'
         })
+        const optionLater = createCustomElement('option', 'task-filter-options', {
+            text: 'For later',
+            value: 'later'
+        })
         const optionCompleted = createCustomElement('option', 'task-filter-options', {
             text: 'Active',
             value: 'active'
         })
+
 
         const taskOptions = [
             optionScheduled,
             optionToday,
             optionWeek,
             optionMonth,
+            optionLater,
             optionCompleted
         ];
 
         appendChildren(taskFilterEl, taskOptions);
+
+        taskFilterEl.addEventListener('change', selectTaskFilter)
         return taskFilterEl;
     }
     const _createOptions = () => {
@@ -57,7 +65,7 @@ const TaskHandler = (() => {
 
         appendChildren(taskHandlerOptionsEl, [addTaskBtn, _filterSelectors()]);
 
-        addTaskBtn.addEventListener('click', showTaskFormIfProjectIsActive);
+        addTaskBtn.addEventListener('click', DOMController.showTaskForm);
         return taskHandlerOptionsEl;
     }
     const emptyTaskMsg = createEl('div', 'task-handler__empty-msg', 'You don\'t have any tasks.');
@@ -68,6 +76,9 @@ const TaskHandler = (() => {
 
     const createTask = (i, props) => {
         const { id, title, desc, checklist, dueDate, completed, tags } = props;
+
+        const suffixedDate = dueDate.length ? 'due ' + Todo.formatDateByToNow(dueDate) : 'not set';
+
         const taskWrapper = createEl('div', 'task-wrapper');
         const taskBar = createEl('div', 'task-bar');
         const taskControl = createEl('div', 'task-control');
@@ -88,7 +99,7 @@ const TaskHandler = (() => {
         const taskDueDate = createEl('dl', 'task__due-date');
         const dueDateIconWrapper = createEl('dt', 'due-date-icon');
         const dueDateIcon = createImg('img', 'due-date-icon', calendarMonth);
-        const dueDateEl = createEl('dd', 'date', dueDate.length ? dueDate : 'not set');
+        const dueDateEl = createEl('dd', 'date', suffixedDate);
 
         const taskTags = createEl('div', 'task__tags');
 
@@ -97,7 +108,7 @@ const TaskHandler = (() => {
         const taskChecklistToggler = createEl('div', 'task-checklist-toggler');
         const taskChecklistToggleIndicator = createImg('img', 'task-checklist-indicator', chevronDown);
 
-        const checklistWrapper = createEl('div', [`checklist-wrapper${i+1}`, 'hide']);
+        const checklistWrapper = createEl('div', [`checklist-wrapper${i + 1}`, 'hide']);
 
 
         appendChildren(taskWrapper, [taskBar, checklistWrapper]);
@@ -120,27 +131,28 @@ const TaskHandler = (() => {
 
         if (checklist.length) {
             checklist.forEach((c, i) => {
-                const props = { 
-                    completed: c._completed, 
+                const props = {
+                    completed: c._completed,
                     desc: c._desc,
                     id: c._id
                 }
-                const checklist = checklistBar(id, props, i+1);
+                const checklist = checklistBar(id, props, i + 1);
                 checklistWrapper.append(checklist);
             })
         }
 
         taskControlInput.addEventListener('click', (e) => {
-            Todo.toggleTaskCompletion(e.target.checked, id)
+            const selectedFolder = DOMController.getSelectedFolder();
+            Todo.toggleTaskCompletion(e.target.checked, id, selectedFolder);
         });
 
         taskInner.addEventListener('click', () => {
-            showTaskFormIfProjectIsActive(props);
+            DOMController.showTaskForm(props);
         });
 
         taskChecklistToggleIndicator.addEventListener('click', (e) => {
             e.stopPropagation();
-            DOMController.toggleTaskChecklist(e, i+1);
+            DOMController.toggleTaskChecklist(e, i + 1);
         })
 
         return taskWrapper;
@@ -165,7 +177,8 @@ const TaskHandler = (() => {
 
         checklistInput.addEventListener('click', (e) => {
             const ids = { taskId: taskId, checklistId: id };
-            Todo.toggleChecklistCompletion(e.target.checked, ids);
+            const selectedFolder = DOMController.getSelectedFolder();
+            Todo.toggleChecklistCompletion(e.target.checked, ids, selectedFolder);
         })
         return checklistBar;
     }

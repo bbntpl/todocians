@@ -23,7 +23,7 @@
     /** static dimensions **/
     --ribbon-width: 40px;
     --sidebar-width: 280px;
-    --header-height: 100px;
+    --header-height: 75px;
     --footer-height: 30px;
     --main-width: calc(var(--sidebar-width) + var(--ribbon-width));
     --main-height: calc(var(--header-height) + var(--footer-height));
@@ -32,7 +32,6 @@
 /***** BASE ELEMENTS *****/
 * {
     box-sizing: border-box;
-    user-select: none;
 }
 
 html {
@@ -48,12 +47,9 @@ body {
     grid-template-areas: "ribbon sidebar header"
         "ribbon sidebar main"
         "ribbon sidebar footer";
-        overflow: hidden;
+    overflow: hidden;
 }
 
-.searchbar:focus-within {
-    outline: 2px solid var(--color-flamingo);
-}
 
 img, button, a, select, .task-inner {
     cursor: pointer;
@@ -64,14 +60,6 @@ img, button, a, select, .task-inner {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.searchbar>input {
-    height: 100%;
-    outline: none;
-    border: 0;
-    background-color: inherit;
-    border-radius: inherit;
 }
 
 .hide {
@@ -148,23 +136,7 @@ img, button, a, select, .task-inner {
     flex-direction: column;
     height: 100%;
     width: 100%;
-}
-
-.searchbar {
-    display: grid;
-    align-items: center;
-    align-self: center;
-    grid-auto-flow: column;
-    height: 27px;
-    width: min(220px, 90%);
-    background-color: var(--color-athens-gray);
-    border-radius: var(--primary-border-radius);
-    margin: 30px 0 18px 0;
-}
-
-.searchbar img {
-    padding-left: 8px;
-    filter: var(--filtered-nobel);
+    margin-top: 14px;
 }
 
 .organizer {
@@ -282,7 +254,7 @@ img, button, a, select, .task-inner {
     height: var(--header-height);
     width: calc(100vw - var(--main-width));
     background-color: var(--color-flamingo);
-    font-size: clamp(2rem, 3.5vw, 3.8rem);
+    font-size: clamp(1.5rem, 3vw, 3.5rem);
     grid-area: header;
     z-index: 50;
     color: #fff;
@@ -362,10 +334,13 @@ img, button, a, select, .task-inner {
     justify-content: center;
     position: relative;
 }
-.task-handler__list{
+
+.task-handler__list {
     overflow-y: auto;
     max-height: 75vh;
+    padding-bottom: 20px;
 }
+
 .task-handler__list label {
     background-color: #fff;
     border-radius: 50%;
@@ -429,6 +404,7 @@ img, button, a, select, .task-inner {
     display: flex;
     align-items: flex-start;
     width: 100%;
+    gap: 0 20px;
     border-right: 2px solid #fff;
     border-top: 2px solid #fff;
     border-bottom: 2px solid #fff;
@@ -438,8 +414,8 @@ img, button, a, select, .task-inner {
     flex: 1;
 }
 
-.task__details--extra{
-    display: flex; 
+.task__details--extra {
+    display: flex;
     flex-wrap: wrap;
     align-items: start;
     justify-content: center;
@@ -462,11 +438,17 @@ img, button, a, select, .task-inner {
 
 .task__desc, .date {
     color: var(--color-cape-cod);
-    font-size: clamp(.8rem, .9vw, 1.8rem);
+    font-size: clamp(.8rem, .7vw, 1.3rem);
 }
 
-.date{
-    width: min-content;
+.task__desc,.task__title{
+    word-break: break-all;
+    line-height: 1rem;
+}
+
+.date {
+    width: 49px;
+    text-align: center;
 }
 
 .task__due-date {
@@ -475,18 +457,18 @@ img, button, a, select, .task-inner {
     align-items: center;
 }
 
-.due-date-icon{
+.due-date-icon {
     filter: var(--filtered-cape-cod);
 }
 
-.task-checklist-toggler{
+.task-checklist-toggler {
     border: 0;
     background-color: var(--color-flamingo);
     width: 22px;
     height: 22px;
 }
 
-.task-checklist-indicator{
+.task-checklist-indicator {
     filter: var(--filtered-athens-gray);
     width: inherit;
     height: inherit;
@@ -496,14 +478,14 @@ img, button, a, select, .task-inner {
     height: max-content;
 }
 
-.task__tags{
+.task__tags {
     margin: 15px 0 5px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
 }
 
-.task-tag{
+.task-tag {
     background: var(--color-cape-cod);
     color: #fff;
     font-size: 12px;
@@ -613,7 +595,7 @@ img, button, a, select, .task-inner {
     display: flex;
 }
 
-.modal-dialog__response > button {
+.modal-dialog__response>button {
     margin: 0 7px;
 }
 
@@ -628,6 +610,7 @@ img, button, a, select, .task-inner {
     border: 1px solid #e2e8f0;
     border-radius: .25rem;
 }
+
 .response-btn {
     background-color: transparent;
     border: 0;
@@ -775,9 +758,10 @@ img, button, a, select, .task-inner {
 
 /***** MEDIA QUERIES *****/
 @media screen and (max-width: 950px) {
-    body{
+    body {
         font-size: 13px;
     }
+
     .sidebar {
         position: absolute;
         left: var(--ribbon-width);
@@ -787,10 +771,12 @@ img, button, a, select, .task-inner {
         width: min(calc(100vw - var(--ribbon-width)));
 
     }
-    .project__title--large{
+
+    .project__title--large {
         padding-left: 10px;
     }
-    .main > *{
+
+    .main>* {
         margin: 0;
         padding: 10px;
     }
@@ -805,8 +791,5 @@ img, button, a, select, .task-inner {
 @media screen and (max-width: 500px) {
     .logo {
         display: none;
-    }
-    .sidebar__inner{
-        margin-top: 14px;
     }
 }
