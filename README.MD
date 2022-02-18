@@ -1,9 +1,9 @@
-## Todo
-This is a todo app that features project creation mostly used in differenct cases such as big projects or classifying tasks. The project contain tasks and a task features a title, description, checklists and a due date.
+# Todo
+A to-do app that features projects and tags that are used in various cases such as organizing a set of tasks under a project or arranging tasks on classification. The project contains a task that has a property of title, description, checklists, due date, and tags. 
 
 The design was inspired by habitica(especially the task modal). 
 
-#### Tools used
+### Tools used
 
 **Pre-Development**
 - Figma - to visualize initial design
