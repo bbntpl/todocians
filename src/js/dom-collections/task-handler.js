@@ -124,7 +124,7 @@ const TaskHandler = (() => {
 
         if (tags.length) {
             tags.forEach((item) => {
-                const taskTag = createTaskTag(item._name);
+                const taskTag = createTaskTag(item.name);
                 taskTags.append(taskTag);
             })
         }
@@ -132,9 +132,9 @@ const TaskHandler = (() => {
         if (checklist.length) {
             checklist.forEach((c, i) => {
                 const props = {
-                    completed: c._completed,
-                    desc: c._desc,
-                    id: c._id
+                    completed: c.completed,
+                    desc: c.desc,
+                    id: c.id
                 }
                 const checklist = checklistBar(id, props, i + 1);
                 checklistWrapper.append(checklist);

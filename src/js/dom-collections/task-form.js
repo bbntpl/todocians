@@ -18,7 +18,6 @@ import Todo from '../todo';
 import DOMController from '../dom-controller';
 
 import trashIcon from '../../assets/icons/trash.svg';
-import { Task } from '../task';
 
 const TaskForm = (() => {
     const _createTitleInput = (title) => {
@@ -64,8 +63,8 @@ const TaskForm = (() => {
                 e.preventDefault();
                 if(!e.target.value) return false;
                 const checklistObj = {
-                    _completed: false,
-                    _desc: e.target.value
+                    completed: false,
+                    desc: e.target.value
                 }
                 checklistList.append(createChecklistItem(checklistObj));
                 e.target.value = '';
@@ -78,10 +77,10 @@ const TaskForm = (() => {
         const checklistItem = createEl('li', 'task-checklist-item');
         const minitaskCheckbox = createCustomElement('input', 'task-checklist-completed', {
             type: 'checkbox',
-            checked: checklist._completed
+            checked: checklist.completed
         })
         const minitaskName = createCustomElement('input', 'task-checklist-name', {
-            value: checklist._desc
+            value: checklist.desc
         });
         const minitaskDeleteBtn = createImg('img', 'checklist-delete-btn', trashIcon);
 
@@ -128,7 +127,7 @@ const TaskForm = (() => {
             type: 'checkbox',
             checked: matchLinkedTagsToTask(tag, taskTags)
         })
-        const tagName = createEl('span', 'ck-name', tag._name);
+        const tagName = createEl('span', 'ck-name', tag.name);
 
         tagDiv.append(tagLabel);
         appendChildren(tagLabel, [tagCheckbox, tagName]);
