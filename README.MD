@@ -1,6 +1,9 @@
 # Todo
 A to-do app that features projects and tags that are used in various cases such as organizing a set of tasks under a project or arranging tasks on classification. The project contains a task that has a property of title, description, checklists, due date, and tags. 
 
+Click [here](https://bvrbryn445.github.io/todocians/) to access the live demo.
+
+## Inspiration
 The design was inspired by habitica(especially the task modal). 
 
 ### Tools used
@@ -18,5 +21,4 @@ The design was inspired by habitica(especially the task modal).
 - Date-fns
 
 ### Screenshot
-
 ![todocians__ss.png](./src/assets/images/todocians__ss.png)
