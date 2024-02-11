@@ -22,15 +22,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bvrbryn445/todocians.git"
+    "url": "git+https://github.com/bbntpl/todocians.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bvrbryn445/todocians/issues"
+    "url": "https://github.com/bbntpl/todocians/issues"
   },
-  "homepage": "https://github.com/bvrbryn445/todocians#readme",
+  "homepage": "https://github.com/bbntpl/todocians#readme",
   "dependencies": {
     "date-fns": "^2.28.0",
     "dotenv": "^16.0.0",

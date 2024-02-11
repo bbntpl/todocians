@@ -5173,7 +5173,7 @@ const Footer = (() => {
         const footerEl = (0,_helpers__WEBPACK_IMPORTED_MODULE_0__.createEl)('footer', ['footer', 'centered']);
         const footerContent = (0,_helpers__WEBPACK_IMPORTED_MODULE_0__.createCustomElement)('a', 'footer-content', {
             textContent: '© B.B. Antipolo ' + new Date().getFullYear(),
-            href: 'https://github.com/bvrbryn445'
+            href: 'https://github.com/bbntpl'
         });
 
         footerEl.append(footerContent);

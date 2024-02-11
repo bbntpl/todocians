@@ -8,7 +8,7 @@ const Footer = (() => {
         const footerEl = createEl('footer', ['footer', 'centered']);
         const footerContent = createCustomElement('a', 'footer-content', {
             textContent: '© B.B. Antipolo ' + new Date().getFullYear(),
-            href: 'https://github.com/bvrbryn445'
+            href: 'https://github.com/bbntpl'
         });
 
         footerEl.append(footerContent);
